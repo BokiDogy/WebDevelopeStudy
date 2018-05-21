@@ -75,7 +75,7 @@
 				let Eagle = (ti * Math.PI * 2 / count) - (Math.PI / 2);
 
 				if(ti == 1) {
-					clearArc(x0, y0, r, ctx, 5);
+					clearArc(x0, y0, r, ctx, 3);
 				}
 
 				ctx.save();
@@ -89,7 +89,7 @@
 				ctx.closePath();
 				ctx.restore();
 
-				clearArc(x0, y0, r - offset, ctx, 5);
+				clearArc(x0, y0, r - offset, ctx, 3);
 				//画个圈去除锯齿
 				ctx.beginPath();
 				ctx.strokeStyle = "#0ff";
