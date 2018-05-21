@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			header {
+				height: 200px;
+				width: 450px;
+				/*			    background-image: url(img/timg.jpg);
+ * 
+*/
+				border-radius: 20px 10px 20px 10px;
+				/*                background:linear-gradient(to right,#FF006C,#FDF003,#01A3EE);
+*/
+				background: radial-gradient(200px, #FF006C, #FDF003, #01A3EE);
+				margin: 50px auto;
+				text-align: center;
+				box-shadow: 5px 5px 20px #305066, 5px 5px 20px #fff inset;
+				border-image-source: url(img/bk.png);
+				border-image-width: 30px;
+				border-image-slice: 95 75 100 75;
+				border-image-repeat: round round;
+			}
+			
+			#img {
+				height: 400px;
+				width: 800px;
+				background-image: url(img/timg.jpg);
+				background-size: 100% 100%;
+				margin: 0 auto;
+				border-radius: 200px;
+				overflow: hidden;
+			}
+			
+			#shadow {
+				height: 100px;
+				width: 800px;
+				background-color: rgba(230, 200, 200, 0.5);
+			}
+			
+			#shadow2 {
+				height: 0px;
+				width: 0px;
+				margin: 30px auto 0px;
+				border-width: 40px 40px 40px 40px;
+				border-style: double;
+				border-color: #01A3EE #F0FFFF #FF006C #FDF003;
+			}
+			
+			#shadow3 {
+				height: 100px;
+				width: 600px;
+				margin: 35px auto 0px;
+				text-align: center;
+			}
+			
+			@font-face {
+				font-family: maoticaoshu;
+				src: url(font/毛体字体.ttf);
+			}
+			
+			@font-face {
+				font-family: jincao;
+				src: url(font/今草字体.ttf);
+			}
+			
+			@font-face {
+				font-family: boyangcaoshu;
+				src: url(font/博洋草书.TTF);
+			}
+			
+			@font-face {
+				font-family: zhongqi;
+				src: url(font/钟齐流江毛笔草体.ttf);
+			}
+			
+			@font-face {
+				font-family: fangzhengkuangcao;
+				src: url(font/方正狂草.ttf);
+			}
+			#txt {
+				font-family: "fangzhengkuangcao";
+				color: #000;
+				opacity: 1;
+				font-size: 70px;
+				text-shadow: 3px 3px 3px rgba(0, 0, 0, 0.4);
+				font-weight: 500;
+				white-space: nowrap
+			}
+		</style>
+	</head>
+
+	<body>
+		<header id="header">
+
+		</header>
+		<div id="img">
+			<div id="shadow">
+
+			</div>
+			<div id="shadow2">
+
+			</div>
+			<div id="shadow3">
+				<span id="txt">
+	山 高 人 为 峰
+</span>
+			</div>
+		</div>
+	</body>
+
+</html>

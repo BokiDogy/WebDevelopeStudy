@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>手势绘图</title>
+		<style type="text/css">
+			#cv {
+				background-color: #305066;
+				margin: 0px;
+				padding: 0px;
+			}
+		</style>
+		<script type="text/javascript">
+			var ca;
+			var ctx;
+			//九宫格数组
+			var cir = [
+				[3],
+				[3],
+				[3]
+			];
+			//绘制路径数组
+			var path = [
+
+			];
+			//数字密码
+			var pdnum = [2, 5, 8, 7];
+			//密码索引数组
+			var pwd = [];
+
+			var isDraw = false;
+			var firstcir;
+			var startcir;
+			//var nextcir;
+			//验证是否正确
+			var isRight = false;
+			//窗体加载
+			window.onload = function() {
+				onloadwindow();
+				pwd = getPwdindex(pdnum);
+			};
+			//窗体加载函数
+			function onloadwindow() {
+				ca = document.getElementById("cv");
+				ctx = ca.getContext("2d");
+				getCir();
+				//绘制九宫格空心圆
+				for(let i = 0; i < 3; i++) {
+					for(let j = 0; j < 3; j++) {
+						setTimeout(`drawcirstroke(${cir[i][j][1]}, ${cir[i][j][0]}, 20)`, (i*3+j)*100);
+					}
+				}
+			}
+			
+			function redrawwindow() {
+				ca = document.getElementById("cv");
+				ctx = ca.getContext("2d");
+				getCir();
+				//绘制九宫格空心圆
+				for(let i = 0; i < 3; i++) {
+					for(let j = 0; j < 3; j++) {
+						setTimeout(`drawcirstroke(${cir[i][j][1]}, ${cir[i][j][0]}, 20)`,0);
+					}
+				}
+			}
+
+			
+			
+			//绘制九宫格空心圆
+			function drawcirstroke(x, y, r) {
+				ctx.beginPath();
+				ctx.arc(x, y, r, 0, 2 * Math.PI);
+				ctx.strokeStyle = "#CFE6FF";
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				ctx.closePath();
+			}
+
+			//将像素点的x,y值转换为九宫格数组索引
+			function getIndex(x, y) {
+				let index = {};
+				for(let i = 0; i < 3; i++) {
+					for(let j = 0; j < 3; j++) {
+						if(Math.abs(x - cir[i][j][0]) <= 20 && Math.abs(y - cir[i][j][1]) <= 20) {
+							index["x"] = i;
+							index["y"] = j;
+							break;
+						}
+					}
+				}
+
+				return index;
+			}
+			//通过索引绘制线段
+			function drawline(s, n) {
+				//绘起点实心圆
+				ctx.beginPath();
+				ctx.arc(cir[s["x"]][s["y"]][0], cir[s["x"]][s["y"]][1], 10, 0, 2 * Math.PI);
+				ctx.fillStyle = "#CFE6FF";
+				ctx.fill();
+				ctx.closePath();
+				//延时绘线段
+				setTimeout(drawli(s,n),500);
+				
+				//绘终点实心圆
+				ctx.beginPath();
+				ctx.arc(cir[n["x"]][n["y"]][0], cir[n["x"]][n["y"]][1], 10, 0, 2 * Math.PI);
+				ctx.fillStyle = "#CFE6FF";
+				ctx.fill();
+				ctx.closePath();
+			}
+			//绘线段
+			function drawli(s,n)
+			{
+				ctx.beginPath();
+				ctx.moveTo(cir[s["x"]][s["y"]][0], cir[s["x"]][s["y"]][1]);
+				ctx.lineTo(cir[n["x"]][n["y"]][0], cir[n["x"]][n["y"]][1]);
+				ctx.lineWidth = 3;
+				ctx.strokeStyle = "#CFE6FF";
+				ctx.stroke();
+				ctx.closePath();
+			}
+			//鼠标落下事件
+			function d(e) {
+				ctx.clearRect(0, 0, 400, 400);
+				redrawwindow();
+				e = e || event;
+				var x = e.clientX;
+				var y = e.clientY;
+				let index = {};
+				for(let i = 0; i < 3; i++) {
+					for(let j = 0; j < 3; j++) {
+						if(Math.abs(x - cir[i][j][0]) <= 20 && Math.abs(y - cir[i][j][1]) <= 20) {
+							isDraw = true;
+							index["x"] = i;
+							index["y"] = j;
+							break;
+						}
+					}
+				}
+				firstcir = index;
+				startcir = index;
+				path.push(firstcir);
+				return index;
+			}
+
+			//鼠标抬起事件
+			function u(e) {
+				isDraw = false;
+				let isSame = pwd.length == path.length ? true : false;
+				if(isSame) {
+					for(let i = 0; i < pwd.length; i++) {
+						if((path[i]["x"] != pwd[i]["x"]) || (path[i]["y"] != pwd[i]["y"]))
+							isSame = false;
+						break;
+					}
+				}
+				if(path.length > 0) {
+					if(isSame) {
+						isRight = true;
+						alert("登录成功");
+						location.href="电子时钟.html";
+					} else {
+						alert("密码错误");
+					}
+				}
+				isRight = false;
+				path = [];
+
+			}
+
+			function m(e) {
+				e = e || event;
+				var x = e.clientX;
+				var y = e.clientY;
+				let index = getIndex(x, y);
+
+				if(isDraw && index["x"] >= 0) {
+					if((index["x"] != startcir["x"]) || (index["y"] != startcir["y"])) {
+						path.push(index);
+						drawline(startcir, index);
+						startcir = index;
+					}
+				}
+				return index;
+			}
+
+			function getCir() {
+				for(let i = 0; i < 3; i++) {
+					for(let j = 0; j < 3; j++) {
+						let a = [100 + i * 100, 100 + j * 100];
+						cir[i][j] = a;
+					}
+				}
+			}
+
+			function getPwdindex(xpd) {
+				let Pwdindex = [];
+				for(let i = 0; i < xpd.length; i++) {
+					let a = {};
+					a["x"] = (xpd[i] - 1) % 3;
+					a["y"] = parseInt((xpd[i] - 1) / 3);
+					Pwdindex.push(a);
+				}
+				return Pwdindex;
+			}
+		</script>
+	</head>
+
+	<body>
+		<canvas id="cv" width="400" height="400" onmousedown="d()" onmouseup="u()" onmousemove="m()"></canvas>
+	</body>
+
+</html>

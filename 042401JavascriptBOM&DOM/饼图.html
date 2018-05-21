@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			
+		</style>
+		<script type="text/javascript">  
+			window.onload=function(){
+            var can = document.getElementById("can1");  
+            var ctx = can.getContext("2d");  
+            var nums = [26,45,12,5,25,17]; 
+            var sum=0;
+            for(var i=0;i<nums.length;i++){
+            	sum+=nums[i];
+            }
+            var colors = ["green","yellow","blue","red","grey","black"];  
+            var start = 0;  
+            var end = 0;    
+             
+            for (var i = 0;i < nums.length; i ++){  
+                ctx.beginPath();  
+                ctx.moveTo(300,300);  
+                end += nums[i]/sum*Math.PI*2;
+                ctx.strokeStyle = "white";  
+                ctx.fillStyle = colors[i];  
+                ctx.arc(300,300,200,start,end);  
+                ctx.fill();  
+                ctx.closePath();  
+                ctx.stroke();  
+                start += nums[i]/sum*Math.PI*2;  
+            }                                   
+        }            
+</script>  
+	</head>
+	<body>
+		<canvas id="can1" width="800" height="600"></canvas>
+	</body>
+</html>

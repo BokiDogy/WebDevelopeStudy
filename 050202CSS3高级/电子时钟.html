@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>电子时钟</title>
+		<style type="text/css">
+			#cv {
+				background-color: #305066;
+				margin: 0px;
+				padding: 0px;
+			}
+		</style>
+		<script type="text/javascript">
+			//需求
+			//http://www.68idc.cn/help/makewebs/html5/20180125660328.html
+			var timer;
+			var cv;
+			var ctx;
+			var crg;
+			var rgbwhell;
+			var pi2;
+			window.onload = function() { //验证登录界面
+				if(document.referrer.indexOf("http://127.0.0.1:8020/042401JavascriptBOM&DOM/login.html") == -1) {
+					location.href = "login.html";
+				}
+				cv = document.getElementById("cv");
+				ctx = cv.getContext("2d");
+				rgbwhell = colorChange("FF006C", "FDF003", "01A3EE", 60);
+				loaddraw();
+				timer = setInterval(draw, 500);
+
+			}
+
+			function loaddraw() {
+				let rgb = ctx.createLinearGradient(0, 400, 1080, 400);
+				rgb.addColorStop(0, '#FF006C');
+				rgb.addColorStop(0.5, '#FDF003');
+				rgb.addColorStop(1, '#01A3EE');
+
+				ctx.beginPath();
+				ctx.fillStyle = rgb;
+				ctx.fillRect(0, 400, 1080, 100);
+				ctx.closePath();
+
+				for(let i = 0; i < 60; i++) {
+					ctx.beginPath();
+					ctx.fillStyle = "#305066";
+
+					ctx.fillRect(18 * i + 9, 400, 9, 100);
+					ctx.closePath();
+				}
+
+				//圆形随机色
+				crg = ctx.createRadialGradient(700, 200, 0, 700, 200, 120);
+				crg.addColorStop(0, '#FF006C');
+				crg.addColorStop(0.5, '#FDF003');
+				crg.addColorStop(1, '#01A3EE');
+
+				pi2 = 2 * Math.PI;
+				//画钟表边框
+				ctx.beginPath();
+				ctx.fillStyle = "#CFE6FF";
+				ctx.arc(700, 200, 160, 0, pi2);
+				ctx.fill();
+				ctx.closePath();
+				//画表盘
+				ctx.beginPath();
+				ctx.fillStyle = "#305066";
+				ctx.arc(700, 200, 155, 0, pi2);
+				ctx.fill();
+				ctx.closePath();
+				//画刻度
+
+				drawSeconds(60, 3, 5);
+				drawSeconds(12, 4, 7);
+				drawSeconds(4, 6, 10);
+
+				//画中间分隔线
+				ctx.beginPath();
+				ctx.fillStyle = "#CFE6FF";
+				ctx.fillRect(1080, 0, 20, 700);
+				ctx.fill();
+				ctx.closePath();
+
+			}
+
+			//画刻度
+			function drawSeconds(count, width, lenth) {
+				for(let j = 0; j < count; j++) {
+					let eagle = j * pi2 / count;
+
+					ctx.beginPath();
+					ctx.moveTo(700, 200);
+					ctx.fillStyle = "#CFE6FF";
+					ctx.strokeStyle = "#CFE6FF";
+					ctx.lineWidth = width;
+					ctx.arc(700, 200, 155, eagle, eagle);
+					ctx.fill();
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.moveTo(700, 200);
+					ctx.fillStyle = "#305066";
+					ctx.strokeStyle = "#305066";
+					ctx.lineWidth = width + 2;
+					ctx.arc(700, 200, 155 - lenth, eagle, eagle);
+					ctx.fill();
+					ctx.stroke();
+					ctx.closePath();
+				}
+			}
+
+			function draw() {
+				cv = document.getElementById("cv");
+				ctx = cv.getContext("2d");
+				//刷新画布
+				ctx.clearRect(0, 0, 1080, 800);
+				ctx.fillStyle = "#305066";
+				ctx.fillRect(0, 0, 1080, 800);
+				loaddraw();
+
+				//获得时间
+				let d = new Date();
+				let h = d.getHours() > 9 ? '' + d.getHours() : '0' + d.getHours();
+				let m = d.getMinutes() > 9 ? '' + d.getMinutes() : '0' + d.getMinutes();
+				let mm = d.getSeconds() > 9 ? '' + d.getSeconds() : '0' + d.getSeconds();
+				let timetext = `${h}:${m}:${mm}`;
+
+				ctx.beginPath();
+				ctx.fillStyle = "#305066";
+				ctx.fillRect(d.getSeconds() * 18, 400, (1080 - d.getSeconds() * 18), 100);
+				ctx.closePath();
+
+				let grd = ctx.createLinearGradient(0, 0, 400, 300);
+				grd.addColorStop(0, '#fff');
+				grd.addColorStop(0.25, '#0ac');
+				grd.addColorStop(0.5, '#ccc');
+				grd.addColorStop(0.75, '#f00');
+				grd.addColorStop(1, '#fff');
+
+				ctx.fillStyle = grd;
+				ctx.TextStyles = grd;
+				ctx.font = "bold  80px Consolas";
+				ctx.fillText(timetext, 20, 150);
+				ctx.fill();
+				//获取秒\分\时对应的弧度
+				let secondEagle = (d.getSeconds() * pi2 / 60) - (Math.PI / 2);
+				let minEagle = (d.getMinutes() * pi2 / 60) + (d.getSeconds() * pi2 / 3600) - (Math.PI / 2);
+				let horEagle = (d.getHours() % 12 * pi2 / 12) + (d.getMinutes() * pi2 / 720) - (Math.PI / 2);
+				//绘制秒针
+				ctx.beginPath();
+				ctx.moveTo(700, 200);
+				ctx.fillStyle = rgbwhell[d.getSeconds()];
+				ctx.strokeStyle = rgbwhell[d.getSeconds()];
+				ctx.lineWidth = 2;
+				ctx.arc(700, 200, 145, secondEagle, secondEagle);
+				ctx.fill();
+				ctx.stroke();
+				ctx.closePath();
+				//绘制分针
+				ctx.beginPath();
+				ctx.moveTo(700, 200);
+				ctx.fillStyle = rgbwhell[d.getMinutes()];
+				ctx.strokeStyle = rgbwhell[d.getMinutes()];
+				ctx.lineWidth = 3;
+				ctx.arc(700, 200, 120, minEagle, minEagle);
+				ctx.fill();
+				ctx.stroke();
+				ctx.closePath();
+				//绘制时针
+				ctx.beginPath();
+				ctx.moveTo(700, 200);
+				ctx.fillStyle = rgbwhell[d.getHours() % 12 * 5];
+				ctx.strokeStyle = rgbwhell[d.getHours() % 12 * 5];
+				ctx.lineWidth = 4;
+				ctx.arc(700, 200, 90, horEagle, horEagle);
+				ctx.fill();
+				ctx.stroke();
+				ctx.closePath();
+
+				//画圆心
+				ctx.beginPath();
+				ctx.fillStyle = "#CFE6FF";
+				ctx.arc(700, 200, 5, 0, pi2);
+				ctx.fill();
+				ctx.closePath();
+
+				//画右侧表秒针
+				drawRight(1500, 200, 180, d.getSeconds(), 60, 20);
+				//画右侧表分针
+				drawRight(1500, 200, 135, d.getMinutes(), 60, 20);
+				//画右侧表时针
+				drawRight(1500, 200, 90, d.getHours() % 12, 12, 20);
+				//写时间
+				ctx.beginPath();
+				ctx.fillStyle = "#0ff";
+				ctx.font = 'bold 20px Cambria';
+				ctx.fillText(`${h}:${m}:${mm}`, 1470, 220);
+				ctx.closePath();
+			}
+
+			function stop() {
+				if(timer != undefined) {
+					clearInterval(timer);
+				}
+			}
+
+			//三色渐变色算法
+			function colorChange(c1, c2, c3, count) {
+				let a = hexToRgb(c1);
+				let b = hexToRgb(c2);
+				let c = hexToRgb(c3);
+				let colors = [];
+				for(let i = 0; i < parseInt(count / 2); i++) {
+					let stepr1 = (a[0] - b[0]) / (count / 2);
+					let stepg1 = (a[1] - b[1]) / (count / 2);
+					let stepb1 = (a[2] - b[2]) / (count / 2);
+					let numr1 = b[0] + stepr1 * i;
+					let numg1 = b[1] + stepg1 * i;
+					let numb1 = b[2] + stepb1 * i;
+					colors.push(rgbToHex(numr1, numg1, numb1));
+				}
+				for(let j = 0; j < parseInt(count / 2); j++) {
+					let stepr2 = (b[0] - c[0]) / (count / 2);
+					let stepg2 = (b[1] - c[1]) / (count / 2);
+					let stepb2 = (b[2] - c[2]) / (count / 2);
+					let numr2 = c[0] + stepr2 * j;
+					let numg2 = c[1] + stepg2 * j;
+					let numb2 = c[2] + stepb2 * j;
+					colors.push(rgbToHex(numr2, numg2, numb2));
+				}
+				return colors;
+			}
+			//十六进制转rgb
+			function hexToRgb(hex) {
+				let rgb = [];
+				for(let i = 0; i < 6; i += 2) {
+					rgb.push(parseInt(hex.substr(i, 2), 16));
+				}
+				return rgb;
+			}
+			//rgb转十六进制
+			function rgbToHex(r, g, b) {
+				let hex = ((r << 16) | (g << 8) | b).toString(16);
+				return "#" + new Array(Math.abs(hex.length - 7)).join("0") + hex;
+			}
+
+			//根据时间求坐标
+			function getLocation(x0, y0, r, ti, count, offset) {
+				let lct = [];
+				let Eagle = ti * Math.PI * 2 / count;
+				let x = x0 + (r - offset) * Math.sin(Eagle);
+				let y = y0 - (r - offset) * Math.cos(Eagle);
+				lct.push(x);
+				lct.push(y);
+				return lct;
+			}
+
+			//绘制右侧指针
+			function drawRight(x0, y0, r, ti, count, offset) {
+				//画右侧表针
+				let Eagle = (ti * Math.PI * 2 / count) - (Math.PI / 2);
+
+				if(ti == 1) {
+					ctx.save();
+					ctx.beginPath();
+					ctx.fillStyle = "#305066";
+					ctx.moveTo(x0, y0);
+					ctx.arc(x0, y0, r + 20, 0, Math.PI * 2);
+					ctx.fill();
+					ctx.closePath();
+					ctx.restore();
+
+				}
+
+				ctx.save();
+				ctx.beginPath();
+				ctx.shadowBlur = 0;
+				ctx.shadowColor = "#0ee";
+				ctx.fillStyle = "#0ff";
+				ctx.moveTo(x0, y0);
+				ctx.arc(x0, y0, r, -Math.PI / 2, ti == 0 ? Math.PI * 3 / 2 : Eagle);
+				ctx.fill();
+				ctx.closePath();
+				ctx.restore();
+
+				ctx.beginPath();
+				ctx.fillStyle = "#305066";
+				ctx.moveTo(x0, y0);
+				ctx.arc(x0, y0, r - offset, 0, Math.PI * 2);
+				ctx.fill();
+				ctx.closePath();
+				//绘制圆角
+				ctx.save();
+				ctx.beginPath();
+				ctx.shadowBlur = 0;
+				ctx.shadowColor = "#0ee";
+				ctx.fillStyle = "#0ff";
+				ctx.arc(x0, y0 - r + (offset / 2), (offset / 2), Math.PI / 2, Math.PI * 3 / 2);
+				ctx.fill();
+				ctx.closePath();
+				ctx.restore();
+
+				ctx.save();
+				ctx.beginPath();
+				ctx.shadowBlur = 0;
+				ctx.shadowColor = "#0ee";
+				ctx.fillStyle = "#0ff";
+				let scdloc = getLocation(x0, y0, r, ti, count, offset / 2);
+				ctx.moveTo(scdloc[0], scdloc[1]);
+				ctx.arc(scdloc[0], scdloc[1], (offset / 2), 0, Math.PI * 2);
+				ctx.fill();
+				ctx.closePath();
+				ctx.restore();
+
+			}
+		</script>
+	</head>
+
+	<body>
+		<div id="clear">
+
+		</div>
+		<canvas id="cv" width="1820" height="700">
+		</canvas>
+
+		<br />
+		<input type="button" id="stop" value="停止" onclick="stop()" />
+		<input type="button" id="continue" value="继续" onclick="continue()" />
+		<input type="button" id="goto" value="跳转" onclick="go()" />
+	</body>
+
+</html>

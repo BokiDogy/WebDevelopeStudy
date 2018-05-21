@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			#cv {
+				background-color: #fff;
+				margin: 0px;
+				padding: 0px;
+				border-color: #305066;
+				border-style: solid;
+				border-width: 2px;
+			}
+		</style>
+		<script type="text/javascript">
+			var can;
+			var ctx;
+			var startRandomSite;
+			var nextRandomSite;
+			var isOnCir = false;
+			window.onload = function() {
+				can = document.getElementById("cv");
+				ctx = can.getContext("2d");
+				let random = getRandomcir(can.width, can.height, 20);
+				startRandomSite = random;
+				ctx.beginPath();
+				ctx.arc(random[0], random[1], 20, 0, 2 * Math.PI);
+				ctx.fillStyle = "#CFE6FF";
+				ctx.fill();
+				ctx.closePath();
+
+				//				for(var i = 0; i < can.width; i++) {
+				//					for(var j = 0; j < can.height; j++) {
+				//						if(ctx.isPointInPath(i, j)) {
+				//							points["x" + i] = i;
+				//							points["y" + j] = j;
+				//						}
+				//					}
+				//				}
+			}
+
+			function getRandomcir(w, h, r) {
+
+				let random = [Math.floor(Math.random() * (w - r * 2 + 1) + r), Math.floor(Math.random() * (h - r * 2 + 1) + r)];
+				return random;
+			}
+
+			function omm(e) {
+				e = e || event;
+				let x = e.clientX;
+				let y = e.clientY;
+				if(Math.abs(x - startRandomSite[0]) <= 15 && Math.abs(y - startRandomSite[1]) <= 15) {
+					isOnCir = true;
+				} else {
+					isOnCir = false;
+				}
+				if(isOnCir) {
+					let random = getRandomcir(can.width, can.height, 20);
+					draw(random[0], random[1]);
+
+					if(Math.abs((random[0] - x) <= 15) && (Math.abs(random[1] - y) <= 15)) {
+						alert("你抓到了");
+					}
+				}
+			}
+
+			function draw(x, y) {
+
+				ctx.clearRect(0, 0, 400, 400);
+				ctx.fillStyle = "#fff";
+				ctx.beginPath();
+				ctx.fillRect(0, 0, 400, 400);
+				ctx.closePath();
+				ctx.beginPath();
+				ctx.arc(x, y, 20, 0, 2 * Math.PI);
+				ctx.fillStyle = getRandomColor(x, y, 20);
+				ctx.fill();
+				ctx.closePath();
+				isOnCir = false;
+				startRandomSite = [x, y];
+
+			}
+
+			function getRandomColor(x, y, r) {
+				var grd = ctx.createRadialGradient(x, y, 1, x, y, r);
+				let ra = [Math.floor(Math.random() * 155 + 100), Math.floor(Math.random() * 155 + 100), Math.floor(Math.random() * 155 + 100)];
+				//let s = [Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255)];
+				let s = [ra[0] - 100, ra[1] - 100, ra[2] - 100];
+				grd.addColorStop(0, `rgb(${ra[0]},${ra[1]},${ra[2]})`);
+				grd.addColorStop(1, `rgb(${s[0]},${s[1]},${s[2]})`);
+				return grd;
+			}
+		</script>
+	</head>
+
+	<body>
+		<canvas id="cv" width="400" height="400" onmousemove="omm()"></canvas>
+	</body>
+
+</html>

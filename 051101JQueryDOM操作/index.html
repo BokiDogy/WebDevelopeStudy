@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			@font-face {
+				font-family: maoticaoshu;
+				src: url(font/毛体字体.ttf);
+			}
+			
+			@font-face {
+				font-family: jincao;
+				src: url(font/今草字体.ttf);
+			}
+			
+			@font-face {
+				font-family: boyangcaoshu;
+				src: url(font/博洋草书.TTF);
+			}
+			
+			@font-face {
+				font-family: zhongqi;
+				src: url(font/钟齐流江毛笔草体.ttf);
+			}
+			
+			@font-face {
+				font-family: fangzhengkuangcao;
+				src: url(font/方正狂草.ttf);
+			}
+		</style>
+		<script type="text/javascript" src="bootstrap/js/jquery-2.1.1.min.js"></script>
+		<script type="text/javascript">
+//			$(function() {
+//				$("li").each((x, y) => console.log($(y).html()));
+//			});
+			$(function() {
+				$("div").css("margin", "0 auto").css("width", "600px").css("height", "900px").css("border-style", "groove").css("border-color", "#01A3EE #a0FFFF #FF006C #FFFF00").css("border-width", "30px").css("border-bottom-left-radius", "300px")
+					.css("border-top-right-radius", "300px");
+				$("ul").css("margin-top", "50px").css("padding","0px 50px 0px 0px").css("text-align", "center").css("line-height", $("div").height() / 4 + 'px').css("list-style", "none");
+				$("li").css("font-family", "boyangcaoshu").css("font-size", "100px").css("font-style", "normal");
+				$("li:odd").css("color", "#990033");
+				$("li:even").css("color", "#003366");
+				$("div").mouseover(()=>$("div").css("border-style","ridge").css("box-shadow", "5px 5px 20px #101010").css("text-shadow","2px 2px 3px #101010"));
+				$("div").mouseout(()=>$("div").css("border-style","groove").css("box-shadow", "0px 0px 0px #101010").css("text-shadow","0px 0px 0px #101010"));
+
+			})
+		</script>
+	</head>
+
+	<body>
+		<div>
+			<ul>
+				<li>红烧肉</li>
+				<li>酱猪蹄</li>
+				<li>烤鸭</li>
+			</ul>
+		</div>
+
+
+	</body>
+
+</html>

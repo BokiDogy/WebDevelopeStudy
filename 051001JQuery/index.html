@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<script type="text/javascript" src="bootstrap/js/jquery-2.1.1.min.js"></script>
+		<title></title>
+		<script type="text/javascript">
+			//			jQuery(document).ready(()=>alert("JQuery准备就绪"));
+			//			jQuery(document).ready(()=>console.log("JQuerey大法好!"));
+			//			$(()=>alert("Hello JQuery!"));
+			var dvs = $(".dv");
+			var dv = dvs[0];
+			$(load);
+
+			function load() {
+				var dv = $(".dv");
+				dv.css("width", "200px");
+				dv.css("height", "30px");
+				dv.css("text-align", "center");
+				dv.css("line-height",`${dv[0].offsetHeight}px`);
+				dv.css("background-color", "#122B40");
+				$(".dv:odd").css("color", "#FF0000");
+				$(".dv:odd").css("background-color", "#05102e");
+				$(".dv:even").css("color", "#67B168");
+				dv.mouseover(()=>dv.css("cursor","pointer"));
+			};
+		</script>
+	</head>
+
+	<body>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+		<div class="dv">
+			JQuery!
+		</div>
+	</body>
+
+</html>

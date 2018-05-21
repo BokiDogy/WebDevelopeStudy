@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script type="text/javascript">
+			var datas = [{
+					's': '辽宁',
+					'city': ['沈阳', '大连', '本溪', '盘锦', '铁岭', '抚顺']
+				},
+				{
+					's': '吉林',
+					'city': ['长春', '吉林', '四平', '白城']
+				},
+				{
+					's': '黑龙江',
+					'city': ['哈尔滨', '大庆', '齐齐哈尔', '牡丹江', '佳木斯']
+				}
+			];
+var c;
+			window.onload = onloads;
+
+			function onloads() {
+				var s = $$("province");
+				c = document.createElement("select");
+				c.setAttribute("id", "city");
+				let firstindex = 0; 
+				for(i = 0; i < datas.length; i++) {
+					let op = document.createElement("option");
+					op.value = i;
+					op.innerText = datas[i].s;
+					s.appendChild(op);
+					if(i == firstindex) {
+						op.selected = "selected";
+					}
+				}
+				loadcity(firstindex);
+				document.body.appendChild(c);
+				s.onchange = function(e) {
+				    c.children.forEach(x=>c.removeChild(x));//bug
+					e = e || event;
+					let index = e.target.selectedOptions[0].value;
+					loadcity(index);
+				}
+			}
+			function loadcity(i) {
+				for(let j = 0; j < datas[i].city.length; j++) {
+					let opp = document.createElement("option");
+					opp.value = j;
+					opp.innerText = datas[i].city[j];
+					c.appendChild(opp);
+				}
+			}
+			//根据Id获取元素函数$$
+			var $$ = (x) => document.getElementById(x);
+		</script>
+	</head>
+
+	<body>
+		<select name="sheng" id="province">
+
+		</select>
+	</body>
+
+</html>
