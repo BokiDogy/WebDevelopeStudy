@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<style>
+			.axis text {
+				font: 10px sans-serif;
+			}
+			
+			.axis line,
+			.axis path {
+				fill: none;
+				stroke: #000;
+				stroke-width: 1;
+				shape-rendering: crispEdges;
+			}
+		</style>
+	</head>
+
+	<body>
+
+		<script src="js/d3(3.5.17).min.js"></script>
+
+		<script>
+			var margin = {
+					top: 20,
+					right: 20,
+					bottom: 30,
+					left: 40
+				},
+				width = 2200 - margin.left - margin.right,
+				height = 400 - margin.top - margin.bottom;
+
+			var upperPadding = 50;
+
+			var csv_name = "Unemployment Level.csv";
+			var svg_name = "./img/station.svg";
+
+			var x_column = "Year",
+				y_column = "Jan";
+
+			var svg = d3.select("body").append("svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			var data = [{
+				"Year": "1948",
+				"Jan": "2034"
+			}, {
+				"Year": "1949",
+				"Jan": "2596"
+			}, {
+				"Year": "1950",
+				"Jan": "4026"
+			}, {
+				"Year": "1951",
+				"Jan": "2305"
+			}, {
+				"Year": "1952",
+				"Jan": "1972"
+			}, {
+				"Year": "1953",
+				"Jan": "1839"
+			}, {
+				"Year": "1954",
+				"Jan": "3077"
+			}, {
+				"Year": "1955",
+				"Jan": "3157"
+			}, {
+				"Year": "1956",
+				"Jan": "2666"
+			}, {
+				"Year": "1957",
+				"Jan": "2796"
+			}, {
+				"Year": "1958",
+				"Jan": "3875"
+			}, {
+				"Year": "1959",
+				"Jan": "4068"
+			}, {
+				"Year": "1960",
+				"Jan": "3615"
+			}, {
+				"Year": "1961",
+				"Jan": "4671"
+			}, {
+				"Year": "1962",
+				"Jan": "4081"
+			}, {
+				"Year": "1963",
+				"Jan": "4074"
+			}, {
+				"Year": "1964",
+				"Jan": "4029"
+			}, {
+				"Year": "1965",
+				"Jan": "3572"
+			}, {
+				"Year": "1966",
+				"Jan": "2988"
+			}, {
+				"Year": "1967",
+				"Jan": "2968"
+			}, {
+				"Year": "1968",
+				"Jan": "2878"
+			}, {
+				"Year": "1969",
+				"Jan": "2718"
+			}, {
+				"Year": "1970",
+				"Jan": "3201"
+			}, {
+				"Year": "1971",
+				"Jan": "4986"
+			}, {
+				"Year": "1972",
+				"Jan": "5019"
+			}, {
+				"Year": "1973",
+				"Jan": "4326"
+			}, {
+				"Year": "1974",
+				"Jan": "4644"
+			}, {
+				"Year": "1975",
+				"Jan": "7501"
+			}, {
+				"Year": "1976",
+				"Jan": "7534"
+			}, {
+				"Year": "1977",
+				"Jan": "7280"
+			}, {
+				"Year": "1978",
+				"Jan": "6489"
+			}, {
+				"Year": "1979",
+				"Jan": "6109"
+			}, {
+				"Year": "1980",
+				"Jan": "6683"
+			}, {
+				"Year": "1981",
+				"Jan": "8071"
+			}, {
+				"Year": "1982",
+				"Jan": "9397"
+			}, {
+				"Year": "1983",
+				"Jan": "11534"
+			}, {
+				"Year": "1984",
+				"Jan": "9008"
+			}, {
+				"Year": "1985",
+				"Jan": "8423"
+			}, {
+				"Year": "1986",
+				"Jan": "7795"
+			}, {
+				"Year": "1987",
+				"Jan": "7892"
+			}, {
+				"Year": "1988",
+				"Jan": "6953"
+			}, {
+				"Year": "1989",
+				"Jan": "6682"
+			}, {
+				"Year": "1990",
+				"Jan": "6752"
+			}, {
+				"Year": "1991",
+				"Jan": "8015"
+			}, {
+				"Year": "1992",
+				"Jan": "9283"
+			}, {
+				"Year": "1993",
+				"Jan": "9325"
+			}, {
+				"Year": "1994",
+				"Jan": "8630"
+			}, {
+				"Year": "1995",
+				"Jan": "7375"
+			}, {
+				"Year": "1996",
+				"Jan": "7491"
+			}, {
+				"Year": "1997",
+				"Jan": "7158"
+			}, {
+				"Year": "1998",
+				"Jan": "6368"
+			}, {
+				"Year": "1999",
+				"Jan": "5976"
+			}, {
+				"Year": "2000",
+				"Jan": "5708"
+			}, {
+				"Year": "2001",
+				"Jan": "6023"
+			}, {
+				"Year": "2002",
+				"Jan": "8182"
+			}, {
+				"Year": "2003",
+				"Jan": "8520"
+			}, {
+				"Year": "2004",
+				"Jan": "8370"
+			}, {
+				"Year": "2005",
+				"Jan": "7784"
+			}, {
+				"Year": "2006",
+				"Jan": "7064"
+			}, {
+				"Year": "2007",
+				"Jan": "7116"
+			}, {
+				"Year": "2008",
+				"Jan": "7685"
+			}, {
+				"Year": "2009",
+				"Jan": "12058"
+			}, {
+				"Year": "2010",
+				"Jan": "14953"
+			}, {
+				"Year": "2011",
+				"Jan": "13910"
+			}, {
+				"Year": "2012",
+				"Jan": "12650"
+			}, {
+				"Year": "2013",
+				"Jan": "12315"
+			}, {
+				"Year": "2014",
+				"Jan": "10236"
+			}];
+
+			var ordinal_domain = data.map(function(d) {
+				return d[x_column];
+			});
+			var xScale = d3.scale.ordinal()
+				.domain(ordinal_domain)
+				.rangePoints([0, width]);
+
+			var yScale = d3.scale.linear()
+				.domain([0, d3.max(data, function(d) {
+					return parseInt(d[y_column]);
+				})])
+				.range([height, 0]);
+
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.tickSize(6, -height)
+				.tickFormat(function(d) {
+					return d + "";
+				});
+
+			var yAxis = d3.svg.axis()
+				.ticks(10)
+				.scale(yScale)
+				.orient("left")
+				.tickSize(6, -width);
+
+			svg.selectAll(".bar")
+				.data(data)
+				.enter()
+				.append("rect")
+				.attr("class", "bar")
+				.attr("x", function(d) {
+					return xScale(d[x_column]);
+				})
+				.attr("y", function(d) {
+					return yScale(d[y_column]);
+				})
+				.attr("width", 10)
+				.attr("height", function(d) {
+					return height - yScale(d[y_column]);
+				})
+				.attr("fill", function(d) {
+					return "blue";
+				});
+
+			// Import svg file as xml.
+			d3.xml(svg_name, function(xml) {
+
+				// Take xml as nodes.
+				var imported_node = document.importNode(xml.documentElement, true);
+				console.log(imported_node);
+				let point=svg.selectAll(".svg_image")
+					.data(data)
+					.enter()
+					.append("g")
+					.attr("class", "svg_image")
+					.each(function(d, i) {
+						// Clone and append xml node to each data binded element.
+						var imported_svg = this.appendChild(imported_node.cloneNode(true));
+					})
+					.attr("transform", function(d, i) {
+						return "translate(" + (parseInt(xScale(d[x_column]) - 10)) + "," + (parseInt(yScale(d[y_column])) + -5) + ") scale(0.5)";
+					});
+					console.log(point);
+			});
+
+			svg.append("g")
+				.attr("class", "axis y_axis")
+				.call(yAxis)
+				.attr("transform", "translate(5,0)")
+				.append("text")
+				.attr("y", -10)
+				.attr("x", 90)
+				.style("text-anchor", "end")
+				.text("Unemployment level of Jan");
+
+			svg.append("g")
+				.attr("class", "axis x_axis")
+				.attr("transform", "translate(5," + height + ")")
+				.call(xAxis);
+		</script>
+
+	</body>
+
+</html>

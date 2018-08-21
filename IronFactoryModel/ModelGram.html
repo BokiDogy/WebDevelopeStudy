@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>通钢进车模型图</title>
+	<link rel="stylesheet" href="iview/iview.css" />
+	<link rel="stylesheet" href="css/Styles.css" />
+	<style type="text/css">
+	</style>
+	<script type="text/javascript" src="js/vue.js"></script>
+	<script type="text/javascript" src="js/iview.js"></script>
+	<script type="text/javascript" src="js/axios.min.js"></script>
+	<script type="text/javascript" src="js/jshelper.js"></script>
+	<script type="text/javascript" src="js/d3(3.5.17).min.js"></script>
+	<script type="text/javascript" src="js/underscore.js"></script>
+	<script type="text/javascript" src="js/d3-timeline.js"></script>
+	<script type="text/javascript" src="js/axioshelper.js"></script>
+	<script type="text/javascript" src="js/colorChange.js"></script>
+	<script type="text/javascript" src="js/drawModel.js"></script>
+	<script type="text/javascript" src="js/TempData.js"></script>
+	<script type="text/javascript">
+		var TempData = getDTHTranData();
+		var svgSize = {
+			w: 1200,
+			h: 700
+		};
+		var margin = {
+			top: 60,
+			bottom: 40,
+			left: 80,
+			right: 50
+		};
+		var types = ['j', 'xm', 'hm', 'pk', 'ak'];
+		var ctypes = ['焦炭', '洗煤', '褐煤', 'PB粉', '阿特粉'];
+		var chinesenames = ['沈阳枢纽', '东通化', '梅河口', '丹东港', '哈局', '山海关', '通霍地区', '通化周边'];
+		var stationnames = chinesenames.map(x => {
+				return {
+					cname: x,
+					ename: x.toPinYin().toLowerCase()
+				}
+			});
+		window.onload = function () {
+			Vue.prototype.$ajax = axios;
+			var data = {};
+			new Vue({
+				el: "#app",
+				data() {
+					return {
+
+					}
+				},
+				created: function () {
+					allquery(data);
+
+				},
+				watch: {},
+				methods: {
+
+				}
+			});
+		}
+
+		function allquery(data) {
+			// d3.select("#bg").selectAll("*").style("display", "none");
+
+			let svg = d3.select("svg").attr({
+				"width": svgSize.w,
+				"height": svgSize.h
+			});
+			let mapbg = svg.select("#mapbg");
+			let mapbgrect = document.getElementById("mapbg").getBoundingClientRect();
+			let mapbgsite = document.getElementById("mapbg").getBBox();
+			mapbg.attr('transform', "translate(" + (-mapbgsite.x * (svgSize.w / mapbgrect.width) - 2150) + "," + (-mapbgsite.y *
+					(svgSize.h / mapbgrect.height) - 1150) + ")  " + "scale(" + svgSize.w * 2.7 / mapbgrect.width + "," + svgSize.h *
+				5.1 / mapbgrect.height + ")");
+			//用[].slice.call方法将nodelist转为数组
+			let stations = [].slice.call(document.querySelectorAll("polyline[id*='svg_']")).map(x => x.getBBox());
+			//站名
+
+
+			//let typecolor = colorChange2("FF0033", "EDF003", "0099FF", types.length);
+			var typecolor = GetEconomistStrokeColors(types.length);
+			var stationinfo = {},
+				tcolor = {};
+			stations.forEach((x, i) => {
+				if (i != 0) {
+					stationinfo[stationnames[i - 1].ename] = x;
+				}
+			});
+			types.forEach((x, i) => {
+				tcolor[x] = typecolor[i];
+			});
+			var groupdata = _.values(_.groupBy(TempData, (x) => x.group))
+				.map((x, i) => {
+					return {
+						group: x[0].group,
+						sum: _(x).reduce(((a, b) => a + parseInt(b.count)), 0),
+						arvsta: x[0].arvsta,
+						levsta: x[0].levsta,
+						type: x[0].type
+					}
+				});
+			var mingroupdata = _(groupdata).min((x) => x.sum).sum;
+			var tlinedata = _.groupBy(TempData, (x) => x.arvsta);
+
+			//添加marker标签及其属性
+			var defs = mapbg.append("defs");
+			var arrowMarker = defs.append("marker")
+				.attr("id", "arrow")
+				.attr("markerUnits", "strokeWidth")
+				.attr("markerWidth", 12)
+				.attr("markerHeight", 12)
+				.attr("viewBox", "0 0 12 12")
+				.attr("refX", 6)
+				.attr("refY", 6)
+				.attr("orient", "auto");
+
+			var arrow_path = "M2,2 L10,6 L2,10 L6,6 L2,2";
+
+			arrowMarker.append("path")
+				.attr("d", arrow_path)
+				.attr("fill", "#000");
+
+			//按品名画线
+			mapbg.selectAll("*:not(*)").data(TempData).enter().append("path").attr({
+					"fill": "none",
+					"stroke": (d, i) => tcolor[d.type],
+					"class": (d, i) => "trainline" + d.arvsta,
+					"d": (d, i) => {
+						let start = stationinfo[d.levsta];
+						let end = stationinfo[d.arvsta];
+						let mid = {};
+						if (d.group == "2") {
+							let x0 = start.x;
+							let y0 = start.y;
+							let x = end.x;
+							let y = end.y;
+							let h = 8 * d.xh;
+							let basearc = Math.atan((y0 - y) / (x0 - x));
+							let len = Math.sqrt((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y));
+							let sarc = Math.atan(h / (len * 0.5));
+							let xb = Math.sqrt(h * h + (len * 0.5) * (len * 0.5));
+							let rarc = basearc - sarc;
+
+							let mx = x0 - xb * Math.cos(rarc);
+							let my = y0 - xb * Math.sin(rarc);
+							mid = {
+								x: mx,
+								y: my
+							};
+
+						} else {
+							mid = getMiddlePoint(start, end, 0.5, Math.sign((end.x - start.x)) * 8 * d.xh);
+						}
+						return `M${start.x} ${start.y} Q${mid.x} ${mid.y} ${end.x} ${end.y}`;
+						//return `M${start.x} ${start.y} L${end.x} ${end.y}`
+
+					},
+					"id": (d, i) => "path" + i,
+
+				})
+				//.attr("marker-start", "url(#arrow)")
+				//.attr("marker-mid", "url(#arrow)")
+				//.attr("marker-end", "url(#arrow)") 
+				.style({
+					"stroke-width": 0.4
+				});
+
+			//按流量画线
+			/* 			mapbg.selectAll("*:not(*)").data(groupdata).enter().append("path").attr({
+								"fill": "none",
+								"stroke": (d, i) => tcolor[d.type],
+								"d": (d, i) => {
+									let start = stationinfo[d.levsta];
+									let end = stationinfo[d.arvsta];
+									let mid = {};
+									if (d.group == "2") {
+										let x0 = start.x;
+										let y0 = start.y;
+										let x = end.x;
+										let y = end.y;
+										let h = 8;
+										let basearc = Math.atan((y0 - y) / (x0 - x));
+										let len = Math.sqrt((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y));
+										let sarc = Math.atan(h / (len * 0.5));
+										let xb = Math.sqrt(h * h + (len * 0.5) * (len * 0.5));
+										let rarc = basearc - sarc;
+
+										let mx = x0 - xb * Math.cos(rarc);
+										let my = y0 - xb * Math.sin(rarc);
+										mid = {
+											x: mx,
+											y: my
+										};
+
+									} else {
+										mid = getMiddlePoint(start, end, 0.5, Math.sign((end.x - start.x)) * 8);
+									}
+									return `M${start.x} ${start.y} Q${mid.x} ${mid.y} ${end.x} ${end.y}`;
+									//return `M${start.x} ${start.y} L${end.x} ${end.y}`
+
+								},
+								"id": (d, i) => "path" + i,
+
+							})
+							//.attr("marker-start", "url(#arrow)")
+							//.attr("marker-mid", "url(#arrow)")
+							//.attr("marker-end", "url(#arrow)") 
+							.style({
+								"stroke-width": d => d.sum * (0.3 / mingroupdata)
+							}); */
+
+
+			//将车站位置信息转为数组
+			let trainpoints = [],
+				facpoints = [{
+					ename: 'dth',
+					cname: '东通化',
+					site: stationinfo['dth']
+				}],
+				portpoints = [{
+					ename: 'ddg',
+					cname: '丹东港',
+					site: stationinfo['ddg']
+				}];
+			stationnames.forEach(x => {
+				if (x.ename != 'ddg' && x.ename != 'dth') {
+					trainpoints.push({
+						ename: x.ename,
+						cname: x.cname,
+						site: stationinfo[x.ename]
+					});
+				}
+			});
+			//加载svg图标文件
+			let svg_name_trains = "./img/station.svg";
+			let svg_name_fac = "./img/factory.svg";
+			let svg_name_port = "./img/port.svg";
+			let icondata = [{
+				svgname: svg_name_trains,
+				siteinfo: trainpoints
+			}, {
+				svgname: svg_name_fac,
+				siteinfo: facpoints
+			}, {
+				svgname: svg_name_port,
+				siteinfo: portpoints
+			}];
+			icondata.forEach(x => {
+				loadSvgIcon(x.svgname, x.siteinfo, 0.025, tcolor, tlinedata);
+			});
+
+
+			// Import svg file as xml.
+
+			//drawModel(data, svg, svgSize, margin);
+
+		}
+
+
+
+		function getIViewJiLianData(t) {
+			let result = [];
+			if (Array.isArray(t)) {
+				return [];
+			} else {
+				for (let k in t) {
+					let v = t[k];
+					let item = {
+						value: k,
+						label: k,
+						children: getIViewJiLianData(v)
+					};
+					result.push(item);
+				}
+				return result;
+			}
+		}
+
+		function getD3TimeLineData(staname, tcolor, tlinedata) {
+			console.log(TempData);
+			console.log(tlinedata);
+			let daystamp = new Date().Format("yyyy-MM-dd ");
+			let temp = tlinedata[staname];
+			let ltdata = _(temp).groupBy(x => x.type);
+
+			let timelinedata = [];
+			let colors = GetEconomistFillColors(Object.keys(ltdata).length);
+			Object.keys(ltdata).map((x, i) => {
+				let typename = x;
+				let times = ltdata[typename].map(y => {
+					let arrtime = new Date(new Date(daystamp + y.arrtime + ":00").getTime() + parseInt(y.adddays) * 86400000);
+					return {
+						color: tcolor[typename],
+						label: typename,
+						starting_time: arrtime.getTime(),
+						ending_time: arrtime.getTime() + 1800000
+					}
+				});
+				timelinedata.push({
+					times: times
+				});
+			})
+			return timelinedata;
+			//console.log(new Date(daystamp+"7:00"+":00"));
+			//一天是86400秒   故n天前的时间戳为
+		}
+
+		function drawTimeLine(d, tcolor, tlinedata) {
+			let data = getD3TimeLineData(d.ename, tcolor, tlinedata);
+			let exvalue = [];
+			data.forEach(x => {
+				x["times"].forEach(y => {
+					exvalue.push(y.starting_time);
+				})
+			});
+			if (data.length > 0) {
+				let mapbg = d3.select("svg").select("#mapbg").append("g").attr({
+					"transform": "translate(" + (d.site.x - 130) + "," + (d.site.y - 7) + ") scale(0.3)"
+				});
+				let today = new Date().setHours(0, 0);
+				var chart = d3.timeline()
+/* 					.beginning(d3.min(exvalue) - 7200000) // we can optionally add beginning and ending times to speed up rendering a little
+					.ending(d3.max(exvalue) + 7200000); */
+					.beginning(today) // we can optionally add beginning and ending times to speed up rendering a little
+					.ending(today+2*86400000);
+				var svg = mapbg.append("svg").attr({
+						"width": 800,
+					})
+					.datum(data).call(chart);
+			}
+		}
+
+		//加载svg图标文件,作用域问题,需添加图标的svgelement必须重新定义
+		function loadSvgIcon(svg_name, sitedata, scale, tcolor, tlinedata) {
+			d3.xml(svg_name, function (xml) {
+				let mapbg = d3.select("svg").select("#mapbg")
+				// Take xml as nodes.
+				var imported_node = document.importNode(xml.documentElement, true);
+
+				let point = mapbg.selectAll("*:not(*)")
+					.data(sitedata)
+					.enter()
+					.append("g").on({
+						"mouseover": (d, i) => mouver(d),
+						"mouseout": (d, i) => mout(d),
+						"click": (d, i) => mouclk(d, tcolor, tlinedata)
+					})
+					.attr("class", d => "sta" + d.ename)
+					.each(function (d, i) {
+						// Clone and append xml node to each data binded element.
+						var imported_svg = this.appendChild(imported_node.cloneNode(true));
+						//添加站名text标签
+						d3.select(this).append("text").attr({
+								"class": (d, i) => "staname",
+								"x": (d, i) => d.site.x + 6,
+								"y": (d, i) => d.site.y + 4.5,
+							}).style({
+								"font-size": "120pt",
+								"font-family": "黑体",
+								"font-weight": "200",
+								"font-style": "normal",
+							}).text((d) => d.cname)
+							.attr("transform", function (d, i) {
+								return "translate(" + (-d.site.x + 270) + "," + (-d.site.y + 170) + ") scale(0.9,1)";
+							})
+					})
+					.attr("transform", function (d, i) {
+						return "translate(" + d.site.x + "," + d.site.y +
+							") scale(" + scale + ")";
+					});
+			});
+		}
+
+		function getMiddlePoint(start, end, i, h) {
+			let x0 = start.x;
+			let y0 = start.y;
+			let x = end.x;
+			let y = end.y;
+			let basearc = 0;
+			basearc = Math.atan((y - y0) / (x - x0));
+
+			let len = Math.sqrt((x - x0) * (x - x0) + (y - y0) * (y - y0));
+			let sarc = Math.atan(h / (len * i));
+			let xb = Math.sqrt(h * h + (len * i) * (len * i));
+			let rarc = basearc - sarc;
+			/* 			let mx = (y >= y0 ? x : x0) + Math.sign((x - x0) * (y - y0)) * xb * Math.cos(rarc);
+						let my = (y >= y0 ? y : y0) + xb * Math.sin(rarc); */
+			let mx = x0 + xb * Math.cos(rarc);
+			let my = y0 + xb * Math.sin(rarc);
+			return {
+				x: mx,
+				y: my
+			};
+		}
+
+
+		function mouver(d) {
+			let onelement = d3.select("g.sta" + d.ename);
+			onelement.attr({
+				"fill": "red",
+				"cursor": "pointer"
+			});
+		}
+
+		function mout(d) {
+			let onelement = d3.select("g.sta" + d.ename);
+			onelement.attr({
+				"fill": "black",
+				"cusor": "default"
+			});
+		}
+
+		function mouclk(d, tcolor, tlinedata) {
+			let onelement = d3.select("g.sta" + d.ename);
+			d3.select("svg").select("#mapbg").append("rect").attr({
+				"class": "shadowrect",
+				"x": 0,
+				"y": 0,
+				"height": svgSize.h,
+				"width": svgSize.w
+			}).style({
+				"display": "block",
+				"fill": "rgb(184,207,220)",
+				"fill-opacity": "0.5"
+			});
+			d3.selectAll("path[class*='trainline']").style("display", "none");
+			drawTimeLine(d, tcolor, tlinedata);
+		}
+	</script>
+</head>
+
+<body>
+	<div id="app">
+		<Row>
+			<i-col span="8" offset="8">
+				<div>
+					<h1>通钢铁路运输进车模型</h1>
+				</div>
+			</i-col>
+			<i-Col span="4" offset="4"></i-Col>
+		</Row>
+		<div id="bg">
+			<svg>
+				<g id="mapbg">
+
+					<path stroke-miterlimit="10" stroke="#FFFFFF" id="path5" d="m505.436452,173.259786c0,0 0.8,0.5 1.3,0.7s1.7,0.8 2,1.3s1.7,2.3 1.7,2.8s0,1.8 -0.3,2.3c-0.5,0.5 -1,1 -1.5,1.3s-1.5,0.7 -1.8,1.3c-0.3,0.5 -0.2,1.2 -0.5,1.8s-1.3,2.3 -1.3,2.7c-0.2,0.5 0,1 0.3,1c0.3,0.2 2.3,0.5 3,0.7c0.7,0.3 2.2,1 2.7,1.7c0.7,0.5 1.5,1.3 2.5,1.5c0.8,0.2 1.8,0.3 2.2,-0.2s1,-3.3 1.3,-3.8c0.2,-0.5 0.7,-1 1.2,-1.2s3,0.8 3.5,1c0.3,0.2 3.2,1.5 4,2s2.7,1.5 2.7,1.8c-0.2,0.3 -1,2 -1,2.8c0,1 0.3,2.3 0.7,2.8c0.3,0.5 0.8,3.3 1.5,4.2c0.7,0.7 4,7 4.8,7.2s3.3,0.7 8.2,-1c5,-1.7 5.2,-1 6,-1.2s2.7,-0.7 3.8,-1c1.2,-0.3 4,-1.5 5,-1.8c1.2,-0.3 2.3,-0.5 2.8,-1s1.8,-2.3 2.3,-3s2.5,-2.7 3.2,-2.5c0.5,0.3 4,1.2 4.8,2.2c1.2,0.8 2.8,2.2 3.2,2.5c0.5,0.3 2.7,1.7 3.3,2.7c1.5,1.3 1,3.2 0.7,3.8c-0.3,0.5 -1.5,3.5 -1.8,4.2s0,3.2 -0.2,3.8s-0.8,1.5 -1.2,1.8s-0.5,0.8 -0.7,1.5s0.3,3 -0.2,3.7s-1.5,2 -1.7,2.5s-0.3,2.5 0.2,3.5s1.3,4 0.8,4.8s-1.5,1.8 -1,2.3s1.7,3.3 2,4.3s0.5,2.8 0.2,3.2s-2.2,1 -2.8,1.3s-2.3,2.5 -2.5,3.2c-0.2,0.5 -0.8,4.7 -1,6.2c-0.2,1.7 -0.2,5.7 0.2,7c0.3,1.3 1.3,3.7 1,4.7s-0.3,3 -0.8,2.8c-0.5,0 -0.8,-0.2 -1.3,-0.8c-0.7,-0.7 -0.8,-0.3 -1,-1.7c-0.3,-1.7 -0.5,-2.8 -0.8,-3.5s-1.2,-1.5 -1.7,-1.3s-1.8,1.5 -2.2,1.8c-0.3,0.3 -1.3,1.8 -2,2.3s-2,3 -2.7,3.5s-1.8,2.3 -2.5,3c-0.5,0.5 -2.2,2.7 -2.7,3s-2.3,3 -2.5,3.2c-0.2,0.3 -1.7,1.8 -2.5,2.7c-0.8,0.8 -2.7,2.3 -2.8,2.7c-0.2,0.3 -1.2,1 -1.5,1.7c-0.3,0.7 -0.7,2 -0.3,2.8c0.3,0.8 2,3 2.7,3.5s3.2,1.8 3.7,2.2c0.5,0.3 1.2,1.5 1.3,2.2c0.2,0.7 1,1.8 1.5,2.2c0.5,0.2 1.7,0.8 2,0.7c0.3,-0.2 0.7,-0.3 1.3,-0.8c0.7,-0.5 1.7,-1.5 1.7,-1.7s-0.5,-1.3 -0.3,-2s1,-1 1.3,-1s1.2,1 1.5,1.5c0.5,0.5 0.5,0.7 1.2,0.7s1.8,0 1.8,0.3s-0.7,3.8 -1,4.2c-0.3,0.3 -2.3,1 -3.7,1s-3.7,0.3 -4,0.7c-0.3,0.3 -0.5,1.3 -0.5,1.8s1.3,2.7 1.8,3.2s1.8,1.3 2.3,1.5s1.3,0.5 1.2,0.8c-0.2,0.3 -0.2,0.8 -0.8,1.5c-0.7,0.7 -2.2,1.5 -2.7,1.7s-1.8,0.5 -2,0.8c-0.2,0.2 -0.3,1 -0.2,1.5c0.2,0.5 0.8,2 0.7,2.7c-0.2,0.7 -0.3,2.7 -0.8,2.8c-0.5,0.2 -1,0 -1.7,-0.5c-0.5,-0.5 -2,-1.8 -2.7,-1.8s-1.3,0.2 -1.7,0.5c-0.2,0.3 -0.5,1.2 -1,1.3c-0.5,0.2 -1.7,-0.5 -2.7,-0.8c-1,-0.5 -2.5,-1 -3.2,-1.7s-1.5,-1.5 -1.7,-1.7s-0.7,1.8 -0.5,2.3s-0.3,3.2 -1,3.3c-0.7,0.2 -1.5,1.2 -1.2,1.5s2.3,1.3 3,1.2c0.7,-0.2 1.3,-0.3 1.8,-0.2c0.5,0.2 2.2,2.7 2.7,3s3.2,3 3.2,3.7s-1,5.5 -1.3,5.8c-0.3,0.5 -0.2,2.3 0.3,2.8s1,1.8 1,2.3c0.2,0.5 0,2.3 0.3,3s2,2.8 2.8,2.8c0.8,0.2 1.3,-0.2 1.5,0.5s0.2,2.8 0.5,3.2c0.3,0.3 1.3,0.5 2,0s4.7,-2 5.2,-2.7s2.2,-2.3 2.7,-3s0.8,-1.5 1.3,-1.5c0.5,0.2 3.3,4.5 3.7,4.8c0.5,0.7 2.3,2.3 2.3,2.8s1,3 1.5,3.3c0.5,0.5 2.2,2 2.3,2.5c0.2,0.5 0.5,2.5 0,2.8s-1.8,2.2 -2,2.5s-0.3,2.3 0.7,2.3c1,-0.2 2.8,0.2 3.7,-0.2s1.8,-0.7 1.8,-0.5s-0.2,5.3 -0.3,6c-0.2,0.7 -2.2,2.2 -3,2.5s-1.3,2.2 -2,2.8c-0.5,0.7 -1.5,2.5 -2.2,3.2s-2.8,1.3 -3.5,1.5s-3,-0.3 -3.8,-0.5s-2.8,-0.5 -2.8,-0.2s0.2,1.5 0.2,2.2s-0.7,1.3 -1,1.3c-0.5,0 -2.7,-0.5 -3.5,-0.5s-1.7,1.3 -1.8,1.5c-0.2,0.3 -1.2,3.7 -2,4.2s-2.8,0.8 -3.8,1c-1.7,-0.2 -3.8,1.5 -4.3,1.8s-2.2,2 -3,2.3c-0.8,0.5 -4.2,2 -4.8,2.2c-0.5,0.2 -1.3,0.5 -1.8,1s-3.3,3.2 -3.8,3.8c-0.5,0.7 -2.8,3.5 -3.2,4c-0.3,0.5 -1.8,3.7 -2.2,4.2c-0.3,0.3 -0.8,-0.8 -1.2,-1.7c-0.3,-0.7 -2.5,-5.8 -3,-6.3c-0.3,-0.5 -3.5,-3.2 -4.8,-3.8c-1.2,-0.7 -3.2,-1.2 -3.8,-0.7c-0.7,0.5 -1.2,1.8 -1,2.7c0.2,0.7 0.8,4.2 1.5,5.2s0.5,4.3 1,5.3c0.5,1.2 0.5,3.7 0.3,4.3c-0.2,0.7 -0.7,3.8 -0.8,3.8s-3.5,0.8 -4.2,0.8s-3.2,0.3 -4.2,0.5c-1,0 -3.2,0.3 -4.5,0.2c-1.3,-0.2 -1.5,0.5 -1.7,-0.3c-0.3,-0.8 -1,-3 -1.3,-3.3c-0.2,-0.2 -2.3,-2.2 -2.5,-2.3c-0.2,-0.2 -1.7,-1.5 -1.5,-1.8s1.5,-0.3 2.3,-0.8s1.7,-1.5 1.5,-1.7s-3.8,-3 -4.5,-3.5s-2.7,-2.7 -2.8,-3.5c-0.3,-0.8 -3.8,-6.2 -4.3,-6.5s-2.3,-0.7 -3.3,0.2c-1.2,0.8 -2.8,2.8 -3.3,3.2c-0.5,0.3 -3.7,0.2 -4.5,0.3c-0.8,0.2 -2,1.2 -2.2,2.2c-0.3,0.8 0.2,2.2 0,2.7s-0.7,1.2 -0.3,1.8c0.3,0.7 1,3.3 0.5,4s-3,0.8 -3.8,1s-5,-0.2 -5.2,0c-0.2,0.3 -1.8,1.2 -2.5,2.3c-0.7,1.2 -2.2,1 -2.5,0.7s-1.3,-0.7 -2.2,-0.7c-0.8,0.2 -3.2,0.7 -4,1.3c-0.8,0.7 -3.2,2.3 -4.2,3c-1,0.5 -4.5,2.3 -5,2.5s-2.8,0.2 -2.7,-1.7c0.2,-1.8 -0.2,-5 -0.3,-5.7s-1.3,-3.2 -1.7,-3.3c-0.3,-0.2 -3.2,1 -3.7,1.5s-2.5,2.2 -2.7,2.5s-1.3,1.3 -1.8,2s-0.2,6.3 -0.7,7s-2.3,0.8 -3,1.2c-0.7,0.3 -0.7,1 -0.2,1.7s0,2.8 -0.5,3.8s-0.5,2.7 -0.3,3c0.2,0.5 1.7,3 2.7,3.7c0.8,0.7 1.5,2 1.2,2.8c0.2,1.7 -0.3,4 -1.2,4.5c-0.8,0.7 -3,2 -3.2,2.2c-0.3,0.2 -2.5,2.2 -3.5,2.5s-3.2,0.3 -4.2,0.3s-3.7,-0.3 -4.8,0.5c-0.8,1.2 -2.3,2.7 -3,3.5c-0.7,0.7 -1.8,1.2 -2.5,1.2s-4.8,-1.5 -5.5,-1.2s-1.7,2.2 -2.2,3s-1.5,3.5 -1.8,4c-0.3,0.7 -1.7,3.7 -2.2,4c-0.5,0.5 -2.7,0.8 -3.5,0.5s-3.7,-1.3 -4,-1.5c-0.5,0 -1.7,0.8 -2.5,1.8s-1.7,3 -2,3.3s-1.3,-0.5 -2,-1s-1.8,-1 -2.5,-0.5c-0.7,0.7 -2.5,2.3 -3,3.2c-0.5,0.8 -1.2,3.2 -2,3.2s-2,-0.8 -3,-1.3s-1.5,-0.2 -2.7,-0.5c-1.2,-0.5 -2.8,-1.2 -3.2,-1.5c-0.3,-0.2 -1.3,-1 -1.3,-1s0.7,1.3 1,2.2c0.3,0.8 1.2,2.5 0.8,2.8c-0.3,0.3 -2.5,1 -3.5,1.5c-1,0.3 -2.2,1.2 -2.5,1.7s-0.2,2.2 -0.7,3c-0.5,0.7 -2.3,2.5 -3.2,3s-2.7,1 -3,1.3s-1.3,1.8 -1.5,2.2c-0.3,0.5 -2.2,3 -2.5,3.5s-1.8,2.5 -2.3,3.2s-1,2.3 -0.3,2.8s1.7,3.3 1.8,3.8c0.2,0.7 -0.8,2.3 -1.3,2.2s-1.8,-1.5 -2.3,-1.3s0,0.5 -0.3,1.5c-0.3,0.8 -0.5,2.3 -0.8,3.3c-0.3,0.8 -0.2,1.5 -0.8,1.5c-0.5,0.5 -1.3,0.7 -3.7,1c-1.2,0.3 -5.3,0.7 -6.5,0.8c-1.2,0.2 -1.7,-0.2 -2.2,-0.7c-0.2,-0.2 -0.7,-1 -1.2,-1.8s0.5,-1.8 -8.5,-3.5l-6.2,-4.3c0,0 -0.7,-0.8 -2,-1c0,0 -11.8,1.2 -9,-5.5c0,0 2,-5.2 2.7,-5.3c0,0 3.8,-2.8 4,-3.5c0,0 2.8,-2.7 -0.2,-3.5c0,0 -3,-0.8 -2.8,-2.7l-0.8,-3.8c0,0 0.5,-0.8 -3.7,1.7l-7.7,6.2c0,0 -1.3,0.8 -1.5,2.2l-1.3,10.7l-0.8,9c0,0 -1.3,6.5 -8.1,4.5c0,0 -0.6,-1.1 -5.6,2.4c0.8,-0.1 -8.3,1.9 -8.9,1.5l-4.5,1.8c0,0 -4.7,-2.5 -5.5,-4.2c0,0 -1.3,-2.5 -6.3,-3.7c0,0 -5.5,-3.3 -2.7,-6c0,0 2.7,-1.7 1.5,-3.8c0,0 -2.5,-3 1,-4.7c0,0 4.2,-2.2 4.5,-2l3.5,-4.8c0,0 5.7,-3 2.7,-6.5c0,0 -3.2,-3.7 -0.8,-5c0,0 4,-2.5 -1.2,-1.2c0,0 -12,2.3 -13,4.2c0,0 -3.7,4.7 -8.2,1.8c0,0 -3.7,-1.8 -5.3,-1.5c0,0 -8.8,2.5 -9.2,2.2c0,0 -1.7,-0.2 -0.2,1.5c0,0 3.8,6.2 -1.2,7c0,0 -8.2,1.5 -10.8,-4.5c0,0 -0.2,-2.7 -3.5,-1.8c0,0 -5,-0.8 -1.7,-6c0,0 3,-5.2 -0.7,-3.3c0,0 -4.3,3.7 -10.2,-4.8c0,0 -5,-4.7 -8.5,-4.8c0,0 -6.3,-0.3 -2,-2.8l7.2,-6c0,0 5,-6.5 5,-10.7c0,0 0.2,-4.7 -7.3,-3.8c0,0 -4,0.3 -5.8,2.3c0,0 -1,1.2 -4.5,0.3c0,0 -4.2,1.3 -5.5,3.5c0,0 -1.3,-1.5 -1.8,-0.3c-0.5,1.3 -2,4.5 -2,1.8c0,0 0.2,-4.5 -2.5,-0.5c0,0 -4.8,3.8 -3,-1.5c0,0 2,-2.5 0.2,-5.2c0,0 -1.8,-3.3 -2.3,-3.7c0,0 -12,-7.8 -9,-9.8c0,0 5.8,-1.7 3.7,-6c0,0 -1.8,-5 -2.8,-5.7c0,0 -3.3,-6.3 -4.7,-15.2l23.5,5.3c0,0 16.2,2.3 29,0.2c0,0 21.7,1.8 22.7,3.2c0,0 3.8,11 15.3,9.2c0,0 10.8,5.3 12.8,6.7c0,0 12.5,0.2 13.3,-0.2c0,0 2.2,-1 1.7,4.5l7.5,0l5.2,-3.3l14.8,-6.2c0,0 20,-7.3 20.7,-8c0,0 7.2,0.7 8.3,0.3c0,0 9.3,-1.7 11.2,-1c0,0 12,0.5 14,-1.2c0,0 8.7,-4 10,-3.8c0,0 8.2,-4.7 8.8,-6.8c0,0 1.8,-5.7 14,-11.8c0,0 9.2,-4.2 4.2,-7.8c0,0 -11.7,-8 -6.3,-15.5c0,0 4,-12.3 10.3,-9.3l18.3,5.3c0,0 1.8,0.3 3.7,-0.7c0,0 2.5,-0.8 3.5,-0.8c0,0 5.2,-1.8 9,-8c0,0 -0.3,-7.5 14.2,-5c0,0 8.2,-2.5 13,-9.8c0,0 0.8,-13.5 12,-12.8c0,0 4.2,-0.5 4.7,-4.5c0,0 0.2,-2.2 4,-1.2c0,0 5.7,-1.2 6.5,-3c0,0 2.2,-1.5 5.5,-1c0,0 5.8,-2 8,-1.2c0,0 17.5,5 11,-6.8c0,0 -2.5,-5.3 -11.7,-11.3c0,0 -4.2,-2.5 -5.5,-2.2c0,0 -5.2,-4 -5.2,-4.3c0,0 -6.5,-2.8 -10.7,1.7c0,0 -6.7,8.7 -8.8,5.7c0,0 -5.3,-4.2 -7.2,-2.5c0,0 -3.5,2.5 -7,1.7c0,0 -2.2,-0.5 -3.3,1.8c0,0 -5.3,2.7 -6.3,-0.7c0,0 -5.3,-5.3 -2.3,-6.2c0,0 3.8,-1.8 2,-5.7c0,0 -0.8,-2.7 1.8,-4c0,0 2,-3.7 1.8,-5.5c0,0 1.3,-7.3 2.8,-8.7c0,0 3.5,-12.7 5.7,-12c0,0 6.8,2.8 8.3,1c0,0 1.7,-2 8,2.3c0,0 2.3,-3.2 4.8,-4.2c0,0 8,-7.2 11,-6.3c0,0 1.8,-0.3 3.2,-2.3c0,0 3,-4.3 0.7,-4.3c0,0 -5.7,-0.7 -1.8,-4.7c0,0 3.3,-3.5 2.3,-5.8c0,0 -0.8,-2.7 1.2,-3.7c0,0 2.8,-1.3 0.5,-3.8c0,0 -1.2,-1.8 1,-1.2c0,0 1.8,-0.3 1.2,-3.5c0,0 -0.3,-2.7 2.8,-6.2c0,0 9.2,-9.8 6.8,-11c0,0 -3.8,-1.2 -2.7,-4.2c0,0 0.2,-6.5 -7.3,-3.2c0,0 -2.3,2 -2.2,-1c0,0 0,-2.2 2.3,-3.3c0,0 3.2,-2.3 6.8,-9c0,0 1.5,-1.2 3.3,-1c0,0 5.3,-0.8 5.8,-2l0.5,1.1z"
+					    stroke-linejoin="round" fill="rgb(205,221,230)" />
+					<path stroke-miterlimit="10" stroke="#FFFFFF" id="path10" d="m506.036452,174.059786c0,0 1.5,-2 7.2,-2.2c0,0 1.3,-3.5 14.9,-5.1c0,0 4.7,0.3 5.5,-1.3c0,0 0.8,-0.5 4,0.8l13.4,4.7c0,0 1.8,0.5 3.3,-0.8c0,0 2.7,-2.2 5,-0.7c0,0 4,0.7 4.7,0.5c0,0 1.7,-0.2 1.3,2.3c0,0 -0.3,2.8 1.3,1.5c0,0 3.7,-1.5 5,1.5c0,0 -2.8,2.3 -0.3,2.7c0,0 2.3,-0.2 4.7,2.7c0,0 1.7,1.7 1.7,2.8c0,0 0,1.5 2.2,1.5c0,0 2,0 1.5,1.8c0,0 0.2,1.5 2.5,3.8l2.5,3.2c0,0 1.2,2.7 2.3,3.5c0,0 1,0.8 0.3,1.7c0,0.2 -1,1.5 1,1.5c0,0 1.7,-0.2 1.2,1.2c0,0 0.2,1.8 2.3,3.2c0,0 5.8,3.9 7.3,10.1c0,0 2.8,3.9 4.3,5.1c0,0 0.7,2.2 0.3,3.8c0,0 -0.2,3.2 3.2,4.6c0,0 6,3.2 8.8,2.3c0,0 1.8,-0.2 6.2,-2.7c0,0 2.3,-1.2 2.3,0.7c0,0 0,1.8 1.8,1.3c0,0 1.7,-0.3 2,0.8c0,0 0.5,1 2.3,0c0,0 2.7,-3 5,-1.5l10.7,6.4c0,0 2,1.2 5,-0.2c0,0 4.7,-0.8 4,1.3c0,0 -2.7,3.2 0.7,5.1c0,0 5,2.5 3.5,6.6c0,0 -1.3,2.5 2.7,5.9c0,0 4.7,4.4 7.2,2.3c0,0 2,-1.7 4.7,-1c0,0 5,0.5 6.8,-1l6.2,-3.7c0,0 1.7,-0.8 1.8,-2c0,0 0.5,-2.7 1.8,-3.2l4.5,-4.7c0,0 2,-1.5 3.3,-1.5c0,0 6.8,-2.8 10.7,-5.9c0,0 3.3,-3 5,-3.2c0,0 2.3,-0.7 3.2,-1.5l3.3,-3c0,0 0.2,2.5 -1.2,4.4c0,0 -3.2,6.9 -1.3,8.1c0,0 4.5,3.5 2.5,7.4c0,0 -0.5,2.2 -4.7,5.4c0,0 -2.2,1.8 -0.5,3c0,0 1.2,1.7 -0.2,5.2c0,0 -0.7,2.5 0.2,4.2c0,0 0.3,2.3 -0.2,3.9c0,0 0.5,3.3 1.3,4.4c0,0 0.5,0.7 -0.7,3.5c0,0 -1.2,2.7 -0.3,3.8c0,0 1.3,1.8 -0.3,3.2c0,0 -1.5,2 -1,4.1c0,0 0.5,2.2 -1.7,4.2c0,0 -2.3,2 -1.3,4.1c0,0 3,3.8 0.5,6.2c0,0 -6.7,1 -8.5,0.3c0,0 -7.7,-0.8 -10.2,-2.2c0,0 -1.7,-0.3 -1.7,1.5c0,0 0.7,6.6 -3.8,8.9c0,0 -2.2,1.8 -3.7,0.8c0,0 -3,-0.3 -1.7,2.7c0,0 4.8,6.1 5.5,7.4c0,0 4.3,8.7 4.3,10.4c0,0 1,4.7 2,5.4c0,0 2.2,3 1.3,4.6c0,0 -1.5,-1.2 -4,-0.5c0,0 -3.7,0.5 -4.2,0c0,0 -2,-2 -3,-1.8c0,0 -4.5,0.5 -5.5,-1.5c0,0 -0.5,-2.7 -0.5,-3c0,0 -1,-3.3 -1.7,-3.7c0,0 -1,-0.5 -3,4.2c0,0 -0.5,1.7 -2.7,0c0,0 -1.7,-1.8 -3.5,0.8c0,0 -0.8,1.5 -3.5,2.2c0,0 -3.3,0.8 -3.2,3.2c0,0 0.8,3.5 -2.2,4.1c0,0 -2.2,1 -4.8,-2.2l-5.2,-6.2c0,0 -4.5,-2 -3,-5.4c0,0 1.2,-4.2 -2.3,-2.2l-3.7,3.9c0,0 -0.8,0.7 0.3,2.7c0,0 1.8,2.2 0,3.3c0,0 -2,1.8 -4,-0.7l-2.2,-2.3c0,0 -3.5,-5.4 -4,-5.6c0,0 -2.8,-1.3 -4.3,-0.8c0,0 -4.5,2.2 -4.2,-0.3c0,0 0.5,-4.7 -0.7,-5.4c0,0 -0.5,-2 -1.3,-2.2c0,0 -1.3,-1.3 -2,-1.7l-5.5,-1.2c0,0 0.2,-0.7 -5,2.7c0,0 -3.7,1.2 -7.2,-1c0,0 -2.2,-2.3 -2.8,-3.8c0,0 -0.2,-1.5 -2.3,-0.3c0,0 -1.7,0.5 -2.3,2c0,0 -1.3,2.3 -5,0.8c0,0 -2.3,-2.8 -4,-0.3c0,0 -0.2,2.7 -6,2.5c0,0 0,0.5 -4.7,-2.8c0,0 -3.5,-0.7 -2.7,-2.5c0,0 1.3,-1.2 -0.7,-3c0,0 -1.8,-1.5 -0.8,-3.3c0,0 1.2,-1.8 -1,-2.8c0,0 -1.3,-1.3 -2,-1c0,0 -3.7,2.8 -5.3,2.7c0,0 -1.3,0.2 -1.7,0.3c0,0 -3,-1.7 -4.2,-1.5c0,0 -4.5,-3 -2.7,-5.1c0,0 0.3,-1.5 4.7,-1c0,0 3.8,0.3 3.5,-3.2c0,0 1.3,-3 -0.3,-2.7c0,0 -2,0.7 -2.2,-0.2c0,0 -1.8,-3.2 -2.8,-1.3c0,0 -0.2,0.7 0.2,2.2l-0.8,1c0,0 -1.8,2.3 -3.3,1.5c0,0 -2,-0.8 -2.8,-3.2c0,0 -1.7,-2.3 -4.2,-3.5c0,0 -4.3,-2.5 -3.2,-6.2c0,0 -0.2,-0.7 5.5,-5.4c0,0 2.2,-2.7 2.5,-3.2c0.3,-0.3 5.8,-6.2 5.8,-6.2l4.8,-6.6c0,0 2.7,-2.3 3,-2.5c0.3,0 1.3,0 1.7,0.8l1.3,4.6c0,0 2,1.7 2,2c0.2,0.3 1.2,-2.5 1,-3.9c0,0 -1.8,-5.6 -1.2,-8.1c0,0 0.2,-8.6 1.5,-9.4c0,0 2,-3 4.2,-3.2c0,0 1.8,0 0.7,-4.1l-1.8,-3.5c0,0 -0.5,-1 0.3,-1.5c0,0 1,-0.7 0.3,-2.7c0,0 -1.8,-6.2 -0.5,-7.2c0,0 2,-2 1.7,-3.8c0,0 -0.5,-2.8 0.3,-3.5c0,0 1.7,-1.2 1.2,-3.8c0,0 0.3,-4.4 1.5,-5.1c0,0 2.3,-3 -0.8,-5.1l-4.3,-3.3c0,0 -3,-2.5 -6.3,-3.5c0,0 -0.7,-0.3 -4,3.5c0,0 -1.5,2.7 -4.8,3c0,0 -6.7,2.5 -7.2,2.7c0,0 -7.3,1.2 -7.7,1.3c0,0 -6.5,2.8 -8.2,0.8c0,0 -5.5,-7.4 -5.5,-9.1c0,0 -2,-4.2 -0.8,-5.7c0,0 1.7,-2 -0.5,-2.8l-7.7,-3.7c0,0 -2.5,-1 -2.8,1c0,0 0,5.7 -3.8,3.7c0,0 -4.5,-3.5 -6.7,-3.8c0,0 -2.3,0.3 -1,-1.3c0,0 1.3,-1.2 1.3,-2.2c0,0 0.5,-2.5 1.3,-2.8c0,0 4.2,-2.2 2.5,-5.1c0,0 -1.2,-2 -2.7,-2.7l-2,-0.8l0,-0.1l0.7,0l0,0.7z"
+					    stroke-linejoin="round" fill="rgb(205,221,230)" />
+					<path stroke-miterlimit="10" stroke="#FFFFFF" id="path11" d="m554.036452,307.359786c0,0 1,-0.3 3.5,1.5c0,0 0.8,0.2 1.3,-0.2c0,0 0.5,-0.5 1.5,-0.3c0,0 2.5,-0.7 2.7,-1.2c0,0 1.2,-1 1.5,-1.2c0.3,-0.2 0.8,-0.8 1.8,0.2l1.5,1c0,0 1,0.5 0.5,2c0,0 -0.7,2 0.5,3.5c0,0 1.8,1.5 1,3c0,0 -0.7,1.7 1.5,2.3c0,0 4,2 4.5,2.7c0,0 0.7,1 3.2,0.5c0,0 2.5,-0.3 3.2,-0.8c0,0 1.3,-2.7 2.7,-2.7c0,0 1.5,0 2.2,1.2c0,0 2.8,1.7 4.2,0.2c0,0 1.8,-2.8 3.5,-3c0,0 1.7,-1 2.3,0.7c0,0 1.7,4 5.2,4.5c0,0 3.7,1.5 6.9,-1.3c0,0 2,-2 4,-1.2l4.5,1.2c0,0 2.2,1.7 2.3,2.2c0,0 1.3,2.3 1.5,3.2l-0.2,3.7c0,0 -0.2,1.5 2,0.8c0,0 4.2,-2 6.4,0.2c0,0 3.8,5.3 4.2,5.7l3.3,3.2c0,0 1.2,1 2.3,0c0,0 2.2,-0.8 1.2,-2.7c0,0 -1.8,-2.3 -1,-3.5l4.2,-4.5c0,0 2,-1.2 2.2,0.8c0,0 -0.7,3.2 -0.5,3.7c0,0 -0.3,1.5 3.2,3.2l4.7,6c0,0 3,4.5 6.6,2.2c0,0 1.5,-0.8 1,-4.7c0,0 0.3,-1 2.2,-1.8c0,0 4,-1.3 4.5,-2.8c0,0 1,-2.2 3.2,-0.8c0,0 1.7,2.2 2.8,0c0,0 1.7,-3.8 2.5,-3.8c0,0 0.7,-0.7 1.2,0.8c0,0 1.7,4.8 1.7,5.8c0,0 1.5,1.3 3,1.2c0,0 3.2,0 3.8,0.7c0,0 1,0.5 1.2,1c0,0 1,0.7 1.7,0.3c0,0 4.7,-0.2 5.3,-0.2c0,0 0.8,-0.2 1,0.5c0,0 0,5.2 0.3,5.5c0,0 0.3,2.8 -1.7,4.3c0,0 -1.5,2.5 -5.2,2.7c0,0 -1.8,0.3 -0.8,2.3l2.7,4.8c0,0 0,0.3 -2,-0.2c0,0 -4.7,-0.5 -5.3,-3c0,0 -1.5,-6.2 -4.7,-5.8c0,0 -4,-0.5 -3.8,1.2c0,0 -0.2,5.8 0.2,7.3c0,0 0.7,2.8 0.2,3.7c0,0 -1.7,2.2 -4.7,1.5c0,0 -1.5,0.5 -2,4c0,0 -1.2,4.2 -4.8,6.3c0,0 -5.5,2 -6.6,1.5c0,0 -4.8,-1.2 -5,-0.7c0,0 0.7,2.5 0.7,4.7c0,0 1.3,2.8 2.5,3.8c0,0 2.7,2.7 2.5,3.3c0,0 -0.7,2.7 -2.2,3.5c0,0 -4.2,-0.7 -5,0.7c0,0 -0.7,0.3 -1.5,-0.2l-1.7,0l-3.8,-0.5c0,0 -3.7,0.8 -4.5,-0.2c0,0 -4,-4.7 -4.7,-3.7c0,0 -3.7,1.8 -3.7,4.2c0,0 0.7,1.7 -1,3.5c0,0 -4,6.5 -5.8,11.5c0,0 -0.2,0.7 -1.2,1l-2,1c0,0 -2.8,-1.3 -2.2,-2.5c0,0 2.2,-2.8 -0.2,-4c0,0 -3.5,-1.5 -5,-4.2c0,0 -2.5,-3.3 -3.3,-4c0,0 -1.7,-1.7 -1.7,-3.5c0,0 -1.2,-3.2 0,-2.2c0,0 2.8,2 0.7,-2.3c0,0 -1.5,-2.2 -3,-2.8c0,0 -2,-3.2 -2.8,-4.3l-3.3,-3.7c0,0 -2.8,-2.7 -3.3,-5.5c0,0 -1.2,-4.5 -3.2,-2.3l-0.7,3.7c0,0 -0.2,1.8 -2,2c0,0 -2.3,0.7 -2.5,-2.2c0,0 0.5,-3 -3.5,-4.3c0,0 -5.8,-3 -6.6,-3.3c0,0 -1.3,-0.5 -2.7,0.7c0,0 -6.8,2.3 -6.6,-0.5c0,0 0,-2.2 2,-3.3c0,0 2,-1.3 -1.2,-4.7c0,0 -2.7,-1.8 -2.8,-4.3c0,0 -1,-1.8 -1.8,-2.2c0,0 -1.2,-0.7 -3.7,-5c0,0 -0.3,-1 -1.5,1c0,0 -3.2,4.2 -5.2,4.5c0,0 -4,2.5 -4.5,1.8c0,0 -0.7,0.3 -0.7,-3.2c0,0 0.3,-0.5 -2,-1.2c0,0 -3.2,-1 -2.7,-4.2c0,0 -0.2,-2.2 -1.3,-3.8c0,0 -1.2,-1.3 0,-3.7c0,0 2,-5 0.2,-6.5l-3.2,-3c0,0 -1.2,-2.5 -2.2,-2.3c0,0 -1.3,0.5 -2.3,0.2c0,0 -3.3,-0.5 -1.8,-1.8c0,0 1.8,-1.2 2,-2.7l0.2,-3.7l2.5,2.5c0,0 4.3,1.7 4.7,2c0,0 0.7,0.8 1.3,-1c0,0 0.5,-2.3 3.2,-0.5c0,0 2.8,3.8 3.8,0.5c0,0 0.7,-2 -0.3,-3.5c0,0 -1.2,-2.2 0.7,-2.8c0,0 3.2,-0.5 3.5,-1.7c0,0 2,-1.5 1.2,-2c-0.7,0.3 -3,-0.8 -2.8,-1.2z"
+					    stroke-linejoin="round" fill="rgb(205,221,230)" />
+					<path stroke="#FFFFFF" stroke-miterlimit="10" id="path12" d="m621.036452,408.759786c0,0 -4.3,3.5 -4.5,4.2c0,0 -2,2.2 -4.2,2.2c0,0 -3.7,0.2 -4.2,5.2c0,0 0,1 -2.7,3.3c0,0 -3,2.3 -3.8,4.3c0,0 -2.8,2.7 -1.5,6.7l0.3,0.5c0,0 -0.8,0 -1.7,1c0,0 -2.8,0.2 -4.5,-0.7c0,0 -4.2,0 -4.7,0.8c0,0 -2.2,2.3 -4,1.7c0,0 -1.7,-0.7 -1.5,1c0,0 0.3,2 -2.3,1.8c0,0 -1.3,-0.5 -1.5,0.7l-3,1.8c0,0 -6.5,3.7 -6.8,4.5c0,0 -2,1.3 -2.3,2.8c0,0 -0.5,2.2 -2.2,2.2c0,0 -1.2,-0.2 0,1.8c0,0 0.8,2.2 -1.3,2.5c0,0 -1.2,-0.3 -1.3,1c0,0 0,2.2 -1.8,0.7c0,0 -1,-1.3 -1.2,0.7l-2.5,3.7c0,0 -3,1.3 -3.3,1.5c0,0 -2,1.3 -3.2,-0.2c0,0 -1,-2.8 -0.5,-3.3c0,0 2.3,-1.7 2.5,-2c0,0 2.5,-0.8 3.2,-0.7c0,0 2.3,-1.3 2.2,-1.8c0,0 -2.2,-2.3 -0.2,-3.7c0,0 2.2,-1.5 2.7,-1.5c0,0 1.7,-2.2 -0.3,-1.5l-3.7,1.3c0,0 -2,0.7 -2,-2.7c0,0 0.2,-2.5 -0.7,-3.3c0,0 -1.8,-2.5 0.2,-4.2c0,0 2.5,-1.5 3.2,-1.5c0,0 0.7,-0.8 0.8,-2.3c0,0 0.3,-1.5 1,-1.5c0,0 0.8,-2.7 1.3,-2.7c0,0 1.8,1.5 1.8,-1c0,0 -0.5,-3.2 1.2,-4.5c0,0 1.3,-1 -0.3,-1.8c0,0 -3,-0.7 -3,-2.2c0,0 0,-0.7 -1.3,-0.8c0,0 -2,-0.7 -2.3,-2.7c0,0 -1.8,-2.3 -3,-1.3l-1.8,1.3l-4,0.8c0,0 -2.8,-0.8 -3.5,0l-1.5,2.3c0,0 -2.2,0.2 -2.8,1.5l-1.5,3.5c0,0 -1.8,1.7 -2.2,2.7l-1.5,1.5c0,0 -0.3,0.7 1,1.2c0,0 0.5,0.5 -0.5,1.2c0,0 -0.7,0.7 -0.8,2.2c0,0 -0.7,2 -4.2,2c0,0 -1.5,0.3 -2.3,1.8c0,0 -2.2,0.8 -2.7,1.8c0,0 -0.7,-3.2 -3.5,-4.2c0,0 -3.8,-1.3 -3.5,-5.5c0,0 -3,1 -4.7,0.7c0,0 -2.8,-3.8 -4.5,-3.5c0,0 -5,0.5 -3.7,-3.5c0,0 3.7,-1.7 3.3,-4.3l1.3,-4.7l1.2,-0.5l0.8,-5.7l-1.5,-6.8c0,0 -3.5,-7.8 -0.3,-8.7c0,0 5,0.2 9.3,6l2.8,6.2l3.5,-5.3c0,0 4.5,-5.7 6.2,-6.5c0,0 6.7,-2.2 9.3,-5.3c0,0 1.2,-1.7 6.5,-2c0,0 2.5,0 3,-3c0,0 0.8,-4.3 3.2,-3.3c0,0 4,1.2 4,-1c0,0 -1.5,-3.3 2.2,-2c0,0 5.3,1.7 8,-0.8c0,0 2.2,-2.5 2.3,-3.7c0,0 2.3,-3.3 3.8,-3.7c0,0 1,-0.5 1.5,-2.5l0,-4.7c0,0 1.2,-1.5 2.7,-0.7l8.8,4.7c0,0 1.2,0.7 1.2,3.3c0,0 0,2 2,1.8c0,0 1.7,0.2 2.2,-2c0,0 0,-5 2,-4.3c0,0 0.5,-0.7 3.7,7c0,0 4.8,4.8 5,5.3l2.7,4.2c0,0 3.8,2.2 3.8,5c0,0 0.2,1.3 -1.3,0.3c0,0 -0.8,-0.7 -0.5,0.8l0.7,3.5l2.5,3l3.7,4.5l3,1.8c0,0 2.5,0.7 0.8,3.3c-0.1,-0.4 -1.6,1.5 1.7,3z"
+					    stroke-linejoin="round" fill="rgb(205,221,230)" />
+					<path id="svg_1" d="m577.814155,396.229476" opacity="0.5" stroke-width="1.5" stroke="#000" fill="#fff" />
+					<polyline stroke-linecap="round" id="svg_2" points="0.75,999.25 0.75,999.25 " stroke-width="1.5" stroke="#000" fill="none"
+					/>
+					<polyline stroke-linecap="round" id="svg_3" points="580.1092365114916,399.180295916024 580.1092365114916,399.180295916024 "
+					    stroke-width="1.5" stroke="#000" fill="none" />
+					<polyline stroke-linecap="round" id="svg_5" points="620.7649709620765,386.39341169366264 620.7649709620765,386.39341169366264 "
+					    stroke-width="1.5" stroke="#000" fill="none" />
+					<polyline stroke-linecap="round" id="svg_6" points="606.9944802610719,369.0163639042998 606.9944802610719,369.0163639042998 "
+					    stroke-width="1.5" stroke="#000" fill="none" />
+					<polyline stroke-linecap="round" id="svg_7" points="595.1912025173538,431.6393097112489 595.1912025173538,431.6393097112489 "
+					    stroke-width="1.5" stroke="#000" fill="none" />
+					<polyline stroke-linecap="round" id="svg_8" points="606.0108737824288,315.68302816958345 606.0108737824288,315.68302816958345 "
+					    stroke-width="1.5" stroke="#000" fill="none" />
+					<polyline stroke-linecap="round" id="svg_9" points="524.6994048812592,439.2895756524098 524.6994048812592,439.2895756524098 "
+					    stroke-width="1.5" stroke="#000" fill="none" />
+					<polyline stroke-linecap="round" id="svg_10" points="515.1515151515151,328.5984848484849 515.1515151515151,328.5984848484849 "
+					    stroke-width="1.5" stroke="#000" fill="none" />
+					<polyline stroke-linecap="round" id="svg_11" points="645.2272727272727,374.0530303030303 645.2272727272727,374.0530303030303 "
+					    stroke-width="1.5" stroke="#000" fill="none" />
+
+				</g>
+			</svg>
+
+		</div>
+	</div>
+</body>
+
+</html>
