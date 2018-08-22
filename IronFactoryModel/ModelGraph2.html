@@ -1,0 +1,249 @@
+<!DOCTYPE html style="height: 100%">
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>通钢进车模型图</title>
+    <link rel="stylesheet" href="iview/iview.css" />
+    <link rel="stylesheet" href="css/Styles.css" />
+    <style type="text/css">
+    </style>
+
+</head>
+
+<body style="height: 100%; margin: 0">
+    <div id="app" style="height: 100%">
+
+        <!-- <h1>通钢铁路运输进车模型</h1> -->
+
+        <div id="container" style="height: 100%"></div>
+        <div id="container2" style="height: 100%"></div>
+    </div>
+
+
+    <script type="text/javascript" src="js/jshelper.js"></script>
+    <script type="text/javascript" src="js/d3(3.5.17).min.js"></script>
+    <script type="text/javascript" src="js/underscore.js"></script>
+    <script type="text/javascript" src="js/colorChange.js"></script>
+    <script type="text/javascript" src="echarts/echarts.js"></script>
+    <script type="text/javascript" src="echarts/echarts-gl.min.js"></script>
+    <script type="text/javascript" src="echarts/ecStat.js"></script>
+    <script type="text/javascript" src="echarts/datatoos.js"></script>
+    <script type="text/javascript" src="echarts/china.js"></script>
+    <script type="text/javascript" src="echarts/world.js"></script>
+    <!-- <script type="text/javascript" src="echarts/bmap.js"></script> -->
+    <script type="text/javascript" src="echarts/simplex.js"></script>
+    <script type="text/javascript" src="echarts/theme-westeros.js"></script>
+
+    <script type="text/javascript" src="js/TempData.js"></script>
+    <script type="text/javascript" src="js/echartsmapdata.js"></script>
+
+
+    <script type="text/javascript">
+        var TempData = getDTHTranData();
+        var svgSize = {
+            w: 1200,
+            h: 700
+        };
+        var margin = {
+            top: 60,
+            bottom: 40,
+            left: 80,
+            right: 50
+        };
+        var types = ['j', 'xm', 'hm', 'pk', 'ak'];
+        var ctypes = ['焦炭', '洗煤', '褐煤', 'PB粉', '阿特粉'];
+        var chinesenames = ['沈阳枢纽', '东通化', '梅河口', '丹东港', '哈局', '山海关', '通霍地区', '通化周边'];
+        var stationnames = chinesenames.map(x => {
+            return {
+                cname: x,
+                ename: x.toPinYin().toLowerCase()
+            }
+        });
+
+
+        var dom = document.getElementById("container");
+        var myChart = echarts.init(dom);
+        var app = {};
+        option = null;
+        var data = citymapdata();
+        var geoCoordMap = geoCoordMap();
+        var links = links();
+        var nodes = _.union(links.map(x => x.source), links.map(x => x.target)).map(x => {
+            return {
+                name: x
+            }
+        });
+        var sankeydata = {
+            nodes: nodes,
+            links: links
+        };
+
+
+
+
+
+
+        myChart.setOption(option = {
+            title: {
+                text: '东通化当前管重'
+            },
+            tooltip: {
+                trigger: 'item',
+                triggerOn: 'mousemove'
+
+            },
+            series: [{
+                type: 'sankey',
+                layout: 'none',
+                data: sankeydata.nodes,
+                links: sankeydata.links,
+                itemStyle: {
+                    normal: {
+                        borderWidth: 1,
+                        borderColor: '#aaa'
+                    }
+                },
+                lineStyle: {
+                    normal: {
+                        curveness: 0.5
+                    }
+                }
+            }],
+            itemStyle: {
+                // 阴影的大小
+                shadowBlur: 180,
+                // 阴影水平方向上的偏移
+                shadowOffsetX: 0,
+                // 阴影垂直方向上的偏移
+                shadowOffsetY: 0,
+                // 阴影颜色
+                shadowColor: 'rgba(0, 0, 0, 0.3)',
+                emphasis: {
+                    shadowBlur: 50,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+        });
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+
+
+
+        var dom2 = document.getElementById("container2");
+        var myChart2 = echarts.init(dom2);
+        var app2 = {};
+        option = null;
+        app.title = '单轴散点图';
+        //myChart2.showLoading();
+        var hours = ['18', '19', '20', '21', '22', '23',
+            '0', '1', '2', '3', '4',
+            '5', '6', '7', '8', '9', '10',
+            '11', '12', '13', '14', '15', '16', '17', '18'
+        ];
+        var typeinfo = [{
+                "etype": "xm",
+                "ctype": "洗煤"
+            },
+            {
+                "etype": "wm",
+                "ctype": "无烟煤"
+            },
+            {
+                "etype": "hm",
+                "ctype": "混煤"
+            },
+            {
+                "etype": "pk",
+                "ctype": "PB粉"
+            },
+            {
+                "etype": "ak",
+                "ctype": "阿特粉"
+            },
+            {
+                "etype": "j",
+                "ctype": "焦 炭"
+            },
+        ];
+
+
+
+        var qdata = quantity();
+        var groupqdata = _(qdata).groupBy(x => x.type);
+        let scdata = Object.keys(groupqdata).map(k => {
+                let l = groupqdata[k];
+                let hourqu = l.map(x => [x.hour,parseInt(x.count)]);
+            let minus = _.difference(hours, l.map(p => p.hour)).map(q => [q, 0]);
+
+        let result = _.union(hourqu, minus).sort((a, b) => {
+            return hours.indexOf(a[0]) - hours.indexOf(b[0])
+        });
+
+        /*          let hourqu = l.map(x => eval(`({${x.hour}:${x.count}})`));
+                    let minus = _.difference(hours, l.map(p => p.hour)).map(q => eval(`({${q}:0})`)); */
+/*         let result = _.union(hourqu, minus).sort((a, b) => {
+            return hours.indexOf(Object.keys(a)[0]) - hours.indexOf(Object.keys(b)[0])
+        }); */
+        let temp = {};
+        temp[k] = result.map((x,i)=>[i,x[1]]);
+        return temp;
+        });
+        console.log(scdata);
+
+
+
+
+
+
+        option = {
+            tooltip: {
+                position: 'top'
+            },
+            title: [],
+            singleAxis: [],
+            series: []
+        };
+
+        echarts.util.each(typeinfo, function (t, idx) {
+
+            option.title.push({
+                textBaseline: 'middle',
+                top: (idx + 0.5) * 100 / 6 + '%',
+                text: t.ctype
+            });
+            option.singleAxis.push({
+                left: 150,
+                type: 'category',
+                boundaryGap: false,
+                data: hours,
+                top: (idx * 100 / 6) + '%',
+                height: (100 / 6 - 5) + '%',
+                axisLabel: {
+                    interval: 1
+                }
+            });
+
+            option.series.push({
+                singleAxisIndex: idx,
+                coordinateSystem: 'singleAxis',
+                type: 'scatter',
+                data: [],
+                symbol: "circle",
+                symbolSize: function (dataItem) {
+                    return dataItem[1] * 1.5;
+                }
+            });
+        });
+        scdata.forEach((x, idx) => {
+            option.series[idx].data=_.values(x)[0];
+        });
+        console.log(option.series);
+        if (option && typeof option === "object") {
+            myChart2.setOption(option, true);
+        }
+    </script>
+</body>
+
+</html>
