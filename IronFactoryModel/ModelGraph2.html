@@ -86,7 +86,15 @@
 
         myChart.setOption(option = {
             title: {
-                text: '东通化当前管重'
+                text: '东通化到达车流来源',
+                textStyle: {
+                    align: 'center',
+                    verticalAlign: 'middle',
+                    fontSize: 20
+                },
+
+                shadowColor: 'rgba(0, 0, 0, 0.5)',
+                shadowBlur: 10
             },
             tooltip: {
                 trigger: 'item',
@@ -123,6 +131,17 @@
                     shadowBlur: 50,
                     shadowColor: 'rgba(0, 0, 0, 0.5)'
                 }
+            },
+            //添加导出文件按钮
+            toolbox: {
+                show: true,
+                　　feature: {
+                    saveAsImage: {
+                        show: true,
+                        excludeComponents: ['toolbox'],
+                        pixelRatio: 2
+                    }
+                }
             }
         });
         if (option && typeof option === "object") {
@@ -142,53 +161,44 @@
             '5', '6', '7', '8', '9', '10',
             '11', '12', '13', '14', '15', '16', '17', '18'
         ];
-        var typeinfo = [{
-                "etype": "xm",
-                "ctype": "洗煤"
-            },
-            {
-                "etype": "wm",
-                "ctype": "无烟煤"
-            },
-            {
-                "etype": "hm",
-                "ctype": "混煤"
-            },
-            {
-                "etype": "pk",
-                "ctype": "PB粉"
-            },
-            {
-                "etype": "ak",
-                "ctype": "阿特粉"
-            },
-            {
-                "etype": "j",
-                "ctype": "焦 炭"
-            },
-        ];
-
+        var typeinfo = typeinfo;
+        var typefunctions = {};
+        typeinfo.forEach(x => typefunctions[x.etype] = x.fun);
+        console.log(typefunctions);
 
 
         var qdata = quantity();
         var groupqdata = _(qdata).groupBy(x => x.type);
         let scdata = Object.keys(groupqdata).map(k => {
-                let l = groupqdata[k];
-                let hourqu = l.map(x => [x.hour,parseInt(x.count)]);
+            let l = groupqdata[k];
+            let hourqu = l.map(x => [x.hour, parseInt(x.count)]);
             let minus = _.difference(hours, l.map(p => p.hour)).map(q => [q, 0]);
 
-        let result = _.union(hourqu, minus).sort((a, b) => {
-            return hours.indexOf(a[0]) - hours.indexOf(b[0])
-        });
+            let result = _.union(hourqu, minus).sort((a, b) => {
+                return hours.indexOf(a[0]) - hours.indexOf(b[0])
+            });
+            let bakresult = result.map(x => [x[0], x[1]]);
+            result.forEach((x, i) => {
+                let s = x[1];
+                bakresult.forEach((y, j) => {
+                    if (j > i) {
+                        y[1] += s;
+                    }
+                })
+            });
 
-        /*          let hourqu = l.map(x => eval(`({${x.hour}:${x.count}})`));
-                    let minus = _.difference(hours, l.map(p => p.hour)).map(q => eval(`({${q}:0})`)); */
-/*         let result = _.union(hourqu, minus).sort((a, b) => {
-            return hours.indexOf(Object.keys(a)[0]) - hours.indexOf(Object.keys(b)[0])
-        }); */
-        let temp = {};
-        temp[k] = result.map((x,i)=>[i,x[1]]);
-        return temp;
+            let afterfunresult1=typefunctions[k](bakresult.map((x,i)=>x[1]),baselinearfunc,5);
+            let afterfunresult = bakresult.map((x, i) => [x[0], x[1]]);
+
+            console.log(afterfunresult1);
+            /*          let hourqu = l.map(x => eval(`({${x.hour}:${x.count}})`));
+                        let minus = _.difference(hours, l.map(p => p.hour)).map(q => eval(`({${q}:0})`)); */
+            /*         let result = _.union(hourqu, minus).sort((a, b) => {
+                        return hours.indexOf(Object.keys(a)[0]) - hours.indexOf(Object.keys(b)[0])
+                    }); */
+            let temp = {};
+            temp[k] = afterfunresult.map((x, i) => [i, x[1]]);
+            return temp;
         });
         console.log(scdata);
 
@@ -232,12 +242,12 @@
                 data: [],
                 symbol: "circle",
                 symbolSize: function (dataItem) {
-                    return dataItem[1] * 1.5;
+                    return dataItem[1] * .8;
                 }
             });
         });
         scdata.forEach((x, idx) => {
-            option.series[idx].data=_.values(x)[0];
+            option.series[idx].data = _.values(x)[0];
         });
         console.log(option.series);
         if (option && typeof option === "object") {

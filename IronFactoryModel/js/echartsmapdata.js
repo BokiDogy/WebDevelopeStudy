@@ -1,3 +1,66 @@
+var baselinearfunc = function (val, modulus,hour) {
+    return (val - modulus*hour);
+};
+var compufunc = function (input, func, modulus) {
+    let output = input.map(x => x);
+    let result = [];
+    let k0=k=output[0];
+    output.forEach((x, i) => {
+        if (i == 0) {
+            result.push(x);
+        } else {
+            let preval = result[i - 1];
+            result.push(func(preval, preval==0?0:modulus));
+        }
+    });
+    return result;
+};
+
+var xmfun = compufunc;
+var wmfun = compufunc;
+var hmfun = compufunc;
+var pkfun = compufunc;
+var akfun = compufunc;
+var jfun = compufunc;
+var typeinfo = [{
+        "etype": "xm",
+        "ctype": "洗煤",
+        "fun": xmfun
+    },
+    {
+        "etype": "wm",
+        "ctype": "无烟煤",
+        "fun": wmfun
+    },
+    {
+        "etype": "hm",
+        "ctype": "混煤",
+        "fun": hmfun
+    },
+    {
+        "etype": "pk",
+        "ctype": "PB粉",
+        "fun": pkfun
+    },
+    {
+        "etype": "ak",
+        "ctype": "阿特粉",
+        "fun": akfun
+    },
+    {
+        "etype": "j",
+        "ctype": "焦炭",
+        "fun": jfun
+    },
+];
+
+
+
+
+
+
+
+
 var quantity = function () {
     return [{
             "hour": "18",
