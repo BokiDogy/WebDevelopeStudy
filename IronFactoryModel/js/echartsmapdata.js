@@ -1,18 +1,52 @@
-var baselinearfunc = function (val, modulus,hour) {
-    return (val - modulus*hour);
+var baselinearfunc = function (modulus, hour) {
+    return modulus * hour;
 };
+
+function comoutput(output, modulus, result) {
+    if (output.length == 0) {
+        return;
+    } else {
+        let k = output[0];
+        let mark = 0
+        let valoutput = output.map(x => {
+            return {
+                val: x,
+                stat: 0
+            }
+        });
+        for (let i = 0; i < valoutput.length; i++) {
+            let x = valoutput[i];
+            let com = x.val - baselinearfunc(modulus, i)
+            if (com > 0) {
+                result.push(com);
+            } else {
+                mark = i;
+                break;
+            }
+        }
+        valoutput.forEach((x, i) => {
+            if (i >= mark) {
+                x.stat = 1;
+            }
+
+        });
+        let valoutput0 = valoutput
+            .filter(x => x.stat > 0)
+            .map(y => (y.val - k) > 0 ? (y.val - k) : 0);
+        valoutput0.forEach(z => {
+            if (z == 0) {
+                result.push(z);
+            }
+        });
+        let valoutput1 = valoutput0.filter(x => x > 0);
+        comoutput(valoutput1, modulus, result);
+    }
+
+}
 var compufunc = function (input, func, modulus) {
     let output = input.map(x => x);
     let result = [];
-    let k0=k=output[0];
-    output.forEach((x, i) => {
-        if (i == 0) {
-            result.push(x);
-        } else {
-            let preval = result[i - 1];
-            result.push(func(preval, preval==0?0:modulus));
-        }
-    });
+    comoutput(output, modulus, result);
     return result;
 };
 
@@ -25,37 +59,74 @@ var jfun = compufunc;
 var typeinfo = [{
         "etype": "xm",
         "ctype": "洗煤",
-        "fun": xmfun
+        "fun": xmfun,
+        "basefun": baselinearfunc,
+        "modulus": 5
     },
     {
         "etype": "wm",
         "ctype": "无烟煤",
-        "fun": wmfun
+        "fun": wmfun,
+        "basefun": baselinearfunc,
+        "modulus": 1
     },
     {
         "etype": "hm",
         "ctype": "混煤",
-        "fun": hmfun
+        "fun": hmfun,
+        "basefun": baselinearfunc,
+        "modulus": 5
     },
     {
         "etype": "pk",
         "ctype": "PB粉",
-        "fun": pkfun
+        "fun": pkfun,
+        "basefun": baselinearfunc,
+        "modulus": 6
     },
     {
         "etype": "ak",
         "ctype": "阿特粉",
-        "fun": akfun
+        "fun": akfun,
+        "basefun": baselinearfunc,
+        "modulus": 3
     },
     {
         "etype": "j",
         "ctype": "焦炭",
-        "fun": jfun
+        "fun": jfun,
+        "basefun": baselinearfunc,
+        "modulus": 1
     },
 ];
 
 
-
+var quantity2=function(){
+    return [
+        {"hour":"18","type":"xm","count":"40"},
+        {"hour":"18","type":"wm","count":"25"},
+        {"hour":"18","type":"hm","count":"25"},
+        {"hour":"18","type":"pk","count":"40"},
+        {"hour":"18","type":"ak","count":"20"},
+        {"hour":"18","type":"j","count":"15"},
+        {"hour":"19","type":"xm","count":"6"},
+        {"hour":"19","type":"xm","count":"10"},
+        {"hour":"19","type":"hm","count":"12"},
+        {"hour":"21","type":"pk","count":"35"},
+        {"hour":"21","type":"hm","count":"44"},
+        {"hour":"22","type":"ak","count":"35"},
+        {"hour":"0","type":"pk","count":"33"},
+        {"hour":"1","type":"xm","count":"44"},
+        {"hour":"2","type":"hm","count":"9"},
+        {"hour":"2","type":"pk","count":"35"},
+        {"hour":"4","type":"xm","count":"1"},
+        {"hour":"4","type":"ak","count":"9"},
+        {"hour":"4","type":"j","count":"54"},
+        {"hour":"5","type":"ak","count":"26"},
+        {"hour":"12","type":"pk","count":"34"},
+        {"hour":"12","type":"wm","count":"33"},
+        ]
+}
 
 
 
@@ -85,12 +156,12 @@ var quantity = function () {
         {
             "hour": "18",
             "type": "ak",
-            "count": "50"
+            "count": "20"
         },
         {
             "hour": "18",
             "type": "j",
-            "count": "20"
+            "count": "15"
         },
         {
             "hour": "19",
@@ -139,7 +210,7 @@ var quantity = function () {
         },
         {
             "hour": "2",
-            "type": "ak",
+            "type": "pk",
             "count": "35"
         },
         {
@@ -154,13 +225,13 @@ var quantity = function () {
         },
         {
             "hour": "4",
-            "type": "pk",
+            "type": "ak",
             "count": "9"
         },
         {
             "hour": "5",
             "type": "ak",
-            "count": "16"
+            "count": "26"
         },
         {
             "hour": "12",
@@ -178,6 +249,125 @@ var quantity = function () {
 
 var links = function () {
     return [{
+        "source": "道清",
+        "target": "洗煤",
+        "value": "12"
+    },
+    {
+        "source": "前阳南",
+        "target": "铁矿粉",
+        "value": "235"
+    },
+    {
+        "source": "前阳南",
+        "target": " ",
+        "value": "39"
+    },
+    {
+        "source": " ",
+        "target": "   ",
+        "value": "39"
+    },
+    {
+        "source": "   ",
+        "target": "无烟煤",
+        "value": "39"
+    },
+    {
+        "source": "梅河口",
+        "target": "铁矿粉",
+        "value": "35"
+    },
+    {
+        "source": "苏家屯",
+        "target": "梅河口",
+        "value": "60"
+    },
+    {
+        "source": "棋盘",
+        "target": "梅河口",
+        "value": "26"
+    },
+    {
+        "source": "裕国",
+        "target": "梅河口",
+        "value": "55"
+    },
+    {
+        "source": "张台子",
+        "target": "苏家屯",
+        "value": "10"
+    },
+    {
+        "source": "山海关",
+        "target": "裕国",
+        "value": "54"
+    },
+    {
+        "source": "哈局",
+        "target": "棋盘",
+        "value": "20"
+    },
+    {
+        "source": "大官屯",
+        "target": "苏家屯",
+        "value": "10"
+    },
+    {
+        "source": "梅河口",
+        "target": "焦炭",
+        "value": "55"
+    },
+    {
+        "source": "梅河口",
+        "target": "焦炭",
+        "value": "54"
+    },
+    {
+        "source": "铁矿粉",
+        "target": "东通化",
+        "value": "270"
+    },
+    {
+        "source": "无烟煤",
+        "target": "东通化",
+        "value": "39"
+    },
+    {
+        "source": "焦炭",
+        "target": "东通化",
+        "value": "55"
+    },
+    {
+        "source": "梅河口",
+        "target": "洗煤",
+        "value": "51"
+    },
+    {
+        "source": "洗煤",
+        "target": "东通化",
+        "value": "63"
+    }, {
+        "source": "球团铁矿",
+        "target": "东通化",
+        "value": "20"
+    },
+    {
+        "source": "白山市",
+        "target": "  ",
+        "value": "20"
+    }, {
+        "source": "  ",
+        "target": "    ",
+        "value": "20"
+    },{
+        "source": "    ",
+        "target": "球团铁矿",
+        "value": "20"
+    },
+]
+
+    /* return [{
             "source": "道清",
             "target": "洗煤",
             "value": "12"
@@ -266,9 +456,120 @@ var links = function () {
             "source": "洗煤",
             "target": "东通化",
             "value": "63"
+        }, {
+            "source": "球团铁矿",
+            "target": "东通化",
+            "value": "20"
         },
-    ]
+        {
+            "source": "白山市",
+            "target": "球团铁矿",
+            "value": "20"
+        },
+    ] */
 }
+
+var wordclouddata = [{
+        "name": "钢厂到达",
+        "value": "1000",
+        "textStyle": {
+            normal: {
+                color: 'black'
+            },
+            emphasis: {
+                color: 'red'
+            }
+        }
+    },
+    {
+        "name": "撵管重",
+        "value": "600"
+    },
+    {
+        "name": "重车到400",
+        "value": "600"
+    },
+    {
+        "name": "第一班排50%",
+        "value": "600"
+    },
+    {
+        "name": "保承认车",
+        "value": "300"
+    },
+    {
+        "name": "抠老牌车",
+        "value": "300"
+    },
+    {
+        "name": "保有量",
+        "value": "300"
+    },
+    {
+        "name": "开车计划",
+        "value": "600"
+    },
+    {
+        "name": "东通化",
+        "value": "100"
+    },
+    {
+        "name": "灵山",
+        "value": "100"
+    },
+    {
+        "name": "老边",
+        "value": "150"
+    },
+    {
+        "name": "凌源东",
+        "value": "100"
+    },
+    {
+        "name": "18点前",
+        "value": "300"
+    },
+    {
+        "name": "抓卸车",
+        "value": "300"
+    },
+    {
+        "name": "排空敞",
+        "value": "600"
+    },
+    {
+        "name": "压车",
+        "value": "300"
+    },    {
+        "name": "草市",
+        "value": "100"
+    },
+     {
+        "name": "本溪",
+        "value": "100"
+    },
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 var citymapdata = function () {
     return [{

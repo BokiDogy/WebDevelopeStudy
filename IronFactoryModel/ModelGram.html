@@ -35,11 +35,11 @@
 		var ctypes = ['焦炭', '洗煤', '褐煤', 'PB粉', '阿特粉'];
 		var chinesenames = ['沈阳枢纽', '东通化', '梅河口', '丹东港', '哈局', '山海关', '通霍地区', '通化周边'];
 		var stationnames = chinesenames.map(x => {
-				return {
-					cname: x,
-					ename: x.toPinYin().toLowerCase()
-				}
-			});
+			return {
+				cname: x,
+				ename: x.toPinYin().toLowerCase()
+			}
+		});
 		window.onload = function () {
 			Vue.prototype.$ajax = axios;
 			var data = {};
@@ -71,7 +71,7 @@
 			let mapbg = svg.select("#mapbg");
 			let mapbgrect = document.getElementById("mapbg").getBoundingClientRect();
 			let mapbgsite = document.getElementById("mapbg").getBBox();
-			mapbg.attr('transform', "translate(" + (-mapbgsite.x * (svgSize.w / mapbgrect.width) - 2150) + "," + (-mapbgsite.y *
+			mapbg.attr('transform', "translate(" + (-mapbgsite.x * (svgSize.w / mapbgrect.width) - 2050) + "," + (-mapbgsite.y *
 					(svgSize.h / mapbgrect.height) - 1150) + ")  " + "scale(" + svgSize.w * 2.7 / mapbgrect.width + "," + svgSize.h *
 				5.1 / mapbgrect.height + ")");
 			//用[].slice.call方法将nodelist转为数组
@@ -91,6 +91,7 @@
 			types.forEach((x, i) => {
 				tcolor[x] = typecolor[i];
 			});
+			console.log(TempData);
 			var groupdata = _.values(_.groupBy(TempData, (x) => x.group))
 				.map((x, i) => {
 					return {
@@ -101,6 +102,7 @@
 						type: x[0].type
 					}
 				});
+			console.log(groupdata);
 			var mingroupdata = _(groupdata).min((x) => x.sum).sum;
 			var tlinedata = _.groupBy(TempData, (x) => x.arvsta);
 
@@ -131,7 +133,7 @@
 						let start = stationinfo[d.levsta];
 						let end = stationinfo[d.arvsta];
 						let mid = {};
-						if (d.group == "2") {
+						if (d.group == "2"||d.group == "8") {
 							let x0 = start.x;
 							let y0 = start.y;
 							let x = end.x;
@@ -164,52 +166,52 @@
 				//.attr("marker-mid", "url(#arrow)")
 				//.attr("marker-end", "url(#arrow)") 
 				.style({
-					"stroke-width": 0.4
+					"stroke-width":(d,i)=>parseInt(d.count)*0.01
 				});
 
 			//按流量画线
-			/* 			mapbg.selectAll("*:not(*)").data(groupdata).enter().append("path").attr({
-								"fill": "none",
-								"stroke": (d, i) => tcolor[d.type],
-								"d": (d, i) => {
-									let start = stationinfo[d.levsta];
-									let end = stationinfo[d.arvsta];
-									let mid = {};
-									if (d.group == "2") {
-										let x0 = start.x;
-										let y0 = start.y;
-										let x = end.x;
-										let y = end.y;
-										let h = 8;
-										let basearc = Math.atan((y0 - y) / (x0 - x));
-										let len = Math.sqrt((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y));
-										let sarc = Math.atan(h / (len * 0.5));
-										let xb = Math.sqrt(h * h + (len * 0.5) * (len * 0.5));
-										let rarc = basearc - sarc;
+			/*mapbg.selectAll("*:not(*)").data(groupdata).enter().append("path").attr({
+					"fill": "none",
+					"stroke": (d, i) => tcolor[d.type],
+					"d": (d, i) => {
+						let start = stationinfo[d.levsta];
+						let end = stationinfo[d.arvsta];
+						let mid = {};
+						if (d.group == "2" || d.group == "8") {
+							let x0 = start.x;
+							let y0 = start.y;
+							let x = end.x;
+							let y = end.y;
+							let h = 8;
+							let basearc = Math.atan((y0 - y) / (x0 - x));
+							let len = Math.sqrt((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y));
+							let sarc = Math.atan(h / (len * 0.5));
+							let xb = Math.sqrt(h * h + (len * 0.5) * (len * 0.5));
+							let rarc = basearc - sarc;
 
-										let mx = x0 - xb * Math.cos(rarc);
-										let my = y0 - xb * Math.sin(rarc);
-										mid = {
-											x: mx,
-											y: my
-										};
+							let mx = x0 - xb * Math.cos(rarc);
+							let my = y0 - xb * Math.sin(rarc);
+							mid = {
+								x: mx,
+								y: my
+							};
 
-									} else {
-										mid = getMiddlePoint(start, end, 0.5, Math.sign((end.x - start.x)) * 8);
-									}
-									return `M${start.x} ${start.y} Q${mid.x} ${mid.y} ${end.x} ${end.y}`;
-									//return `M${start.x} ${start.y} L${end.x} ${end.y}`
+						} else {
+							mid = getMiddlePoint(start, end, 0.5, Math.sign((end.x - start.x)) * 8);
+						}
+						return `M${start.x} ${start.y} Q${mid.x} ${mid.y} ${end.x} ${end.y}`;
+						//return `M${start.x} ${start.y} L${end.x} ${end.y}`
 
-								},
-								"id": (d, i) => "path" + i,
+					},
+					"id": (d, i) => "path" + i,
 
-							})
-							//.attr("marker-start", "url(#arrow)")
-							//.attr("marker-mid", "url(#arrow)")
-							//.attr("marker-end", "url(#arrow)") 
-							.style({
-								"stroke-width": d => d.sum * (0.3 / mingroupdata)
-							}); */
+				})
+				//.attr("marker-start", "url(#arrow)")
+				//.attr("marker-mid", "url(#arrow)")
+				//.attr("marker-end", "url(#arrow)") 
+				.style({
+					"stroke-width": d => d.sum * (0.3 / mingroupdata)
+				});*/
 
 
 			//将车站位置信息转为数组
@@ -321,10 +323,10 @@
 				});
 				let today = new Date().setHours(0, 0);
 				var chart = d3.timeline()
-/* 					.beginning(d3.min(exvalue) - 7200000) // we can optionally add beginning and ending times to speed up rendering a little
-					.ending(d3.max(exvalue) + 7200000); */
+					/* 					.beginning(d3.min(exvalue) - 7200000) // we can optionally add beginning and ending times to speed up rendering a little
+										.ending(d3.max(exvalue) + 7200000); */
 					.beginning(today) // we can optionally add beginning and ending times to speed up rendering a little
-					.ending(today+2*86400000);
+					.ending(today + 2 * 86400000);
 				var svg = mapbg.append("svg").attr({
 						"width": 800,
 					})
@@ -436,7 +438,7 @@
 		<Row>
 			<i-col span="8" offset="8">
 				<div>
-					<h1>通钢铁路运输进车模型</h1>
+					<h1>通钢进车模型OD图</h1>
 				</div>
 			</i-col>
 			<i-Col span="4" offset="4"></i-Col>
