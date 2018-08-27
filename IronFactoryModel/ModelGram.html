@@ -125,7 +125,7 @@
 				.attr("fill", "#000");
 
 			//按品名画线
-			mapbg.selectAll("*:not(*)").data(TempData).enter().append("path").attr({
+			/*mapbg.selectAll("*:not(*)").data(TempData).enter().append("path").attr({
 					"fill": "none",
 					"stroke": (d, i) => tcolor[d.type],
 					"class": (d, i) => "trainline" + d.arvsta,
@@ -166,11 +166,11 @@
 				//.attr("marker-mid", "url(#arrow)")
 				//.attr("marker-end", "url(#arrow)") 
 				.style({
-					"stroke-width":(d,i)=>parseInt(d.count)*0.01
-				});
+					"stroke-width":(d,i)=>parseInt(d.count)*0.02
+				});*/
 
 			//按流量画线
-			/*mapbg.selectAll("*:not(*)").data(groupdata).enter().append("path").attr({
+			mapbg.selectAll("*:not(*)").data(groupdata).enter().append("path").attr({
 					"fill": "none",
 					"stroke": (d, i) => tcolor[d.type],
 					"d": (d, i) => {
@@ -210,8 +210,8 @@
 				//.attr("marker-mid", "url(#arrow)")
 				//.attr("marker-end", "url(#arrow)") 
 				.style({
-					"stroke-width": d => d.sum * (0.3 / mingroupdata)
-				});*/
+					"stroke-width": d => d.sum * (0.5 / mingroupdata)
+				});
 
 
 			//将车站位置信息转为数组

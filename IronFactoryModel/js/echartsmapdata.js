@@ -20,6 +20,7 @@ function comoutput(output, modulus, result) {
             if (com > 0) {
                 result.push(com);
             } else {
+                k=x.val;
                 mark = i;
                 break;
             }
@@ -39,6 +40,7 @@ function comoutput(output, modulus, result) {
             }
         });
         let valoutput1 = valoutput0.filter(x => x > 0);
+        console.log(valoutput1);
         comoutput(valoutput1, modulus, result);
     }
 
@@ -46,6 +48,7 @@ function comoutput(output, modulus, result) {
 var compufunc = function (input, func, modulus) {
     let output = input.map(x => x);
     let result = [];
+    console.log(output);
     comoutput(output, modulus, result);
     return result;
 };
@@ -61,7 +64,7 @@ var typeinfo = [{
         "ctype": "洗煤",
         "fun": xmfun,
         "basefun": baselinearfunc,
-        "modulus": 5
+        "modulus": 4
     },
     {
         "etype": "wm",
@@ -75,7 +78,7 @@ var typeinfo = [{
         "ctype": "混煤",
         "fun": hmfun,
         "basefun": baselinearfunc,
-        "modulus": 5
+        "modulus": 4
     },
     {
         "etype": "pk",

@@ -66,7 +66,7 @@
 			"arrtime": "22:40",
 			"adddays": "0",
 			"type": "j",
-			"count": "35",
+			"count": "55",
 			"levsta": "mhk",
 			"arvsta": "dth",
 			"trainnum": "37703"
@@ -113,7 +113,7 @@
 			"levtime": "13:20",
 			"arrtime": "19:30",
 			"adddays": "0",
-			"type": "pk",
+			"type": "ak",
 			"count": "35",
 			"levsta": "sysn",
 			"arvsta": "mhk",
@@ -138,7 +138,7 @@
 			"arrtime": "23:40",
 			"adddays": "0",
 			"type": "j",
-			"count": "35",
+			"count": "55",
 			"levsta": "sysn",
 			"arvsta": "mhk",
 			"trainnum": "37702"
