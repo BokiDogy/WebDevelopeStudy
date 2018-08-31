@@ -17,9 +17,9 @@
         <!-- <h1>通钢铁路运输进车模型</h1> -->
 
         <div id="container" style="height: 100%"></div>
-        <div id="container2" style="height: 100%"></div>
+        <div id="container2" style="height: 90%"></div>
         <div id="container3" style="height: 100%"></div>
-        <div id="container4" style="height: 100%"></div>
+        <div id="container4" style="height: 90%"></div>
 
     </div>
 
@@ -44,6 +44,8 @@
 
 
     <script type="text/javascript">
+        console.log([...Array(100).keys()]);
+
         var TempData = getDTHTranData();
         var svgSize = {
             w: 1200,
@@ -232,7 +234,6 @@
             ];
             var typefunctions = {};
             typeinfo.forEach(x => typefunctions[x.etype] = [x.fun, x.basefun, x.modulus]);
-            console.log(typefunctions);
 
 
             var groupqdata = _(qdata).groupBy(x => x.type);
@@ -256,7 +257,7 @@
 
                 let afterfunresult1 = typefunctions[k][0](bakresult.map((x, i) => x[1]), typefunctions[k][1],
                     typefunctions[k][2]);
-                let afterfunresult = bakresult.map((x, i) => [x[0], afterfunresult1[i]]);
+                let afterfunresult = bakresult.map((x, i) => [x[0], afterfunresult1[i]]).slice(0,24);
                 /*          let hourqu = l.map(x => eval(`({${x.hour}:${x.count}})`));
                         let minus = _.difference(hours, l.map(p => p.hour)).map(q => eval(`({${q}:0})`)); */
                 /*         let result = _.union(hourqu, minus).sort((a, b) => {
@@ -266,10 +267,6 @@
                 temp[k] = afterfunresult.map((x, i) => [i, x[1]]);
                 return temp;
             });
-
-
-
-
 
 
             option = {
@@ -293,11 +290,17 @@
             };
 
             echarts.util.each(typeinfo, function (t, idx) {
-
                 option.title.push({
                     textBaseline: 'middle',
-                    top: (idx + 0.5) * 100 / 6 + '%',
-                    text: t.ctype
+                    top: (idx + 0.3) * 100 / 6 + '%',
+                    text:t.ctype,
+                    subtext:"原料占比: "+t.times,
+                    subtextStyle:{
+                        color:"#000",
+                        fontWeight:"500",
+                        fontSize:15
+                    }
+
                 });
                 option.singleAxis.push({
                     left: 150,
@@ -307,7 +310,7 @@
                     top: (idx * 100 / 6) + '%',
                     height: (100 / 6 - 5) + '%',
                     axisLabel: {
-                        interval: 1
+                        interval: 0
                     }
                 });
 
@@ -325,7 +328,7 @@
             scdata.forEach((x, idx) => {
                 option.series[idx].data = _.values(x)[0];
             });
-
+            console.log(option);
             if (option && typeof option === "object") {
                 myChart.setOption(option, true);
             }

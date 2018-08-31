@@ -1,5 +1,10 @@
 var baselinearfunc = function (modulus, hour) {
-    return modulus * hour;
+    let fmod = (x) => modulus;
+    let result = [...Array(hour).keys()] //初始化0-hour的序列数组
+    .reduce((pre, cur) => (pre + fmod(cur)), 0);
+    return result;
+
+    //return modulus * hour;
 };
 
 function comoutput(output, modulus, result) {
@@ -20,7 +25,7 @@ function comoutput(output, modulus, result) {
             if (com > 0) {
                 result.push(com);
             } else {
-                k=x.val;
+                k = x.val;
                 mark = i;
                 break;
             }
@@ -59,76 +64,189 @@ var hmfun = compufunc;
 var pkfun = compufunc;
 var akfun = compufunc;
 var jfun = compufunc;
+
 var typeinfo = [{
         "etype": "xm",
         "ctype": "洗煤",
         "fun": xmfun,
         "basefun": baselinearfunc,
-        "modulus": 4
+        "modulus": 4,
+        "times": 0.38,
+        lable: {
+            normal: {
+                formatter: (t) => {
+                    return '{' + t.ctype + ' }\n{b|' + `装车占比${t.times}` + '}';
+                },
+                rich: {
+                    a: {
+                        color: 'red',
+                        lineHeight: 10
+                    },
+                    b: {
+                        backgroundColor: {
+                            image: 'xxx/xxx.jpg'
+                        },
+                        height: 40
+                    },
+                }
+            }
+        }
     },
     {
         "etype": "wm",
         "ctype": "无烟煤",
         "fun": wmfun,
         "basefun": baselinearfunc,
-        "modulus": 1
+        "modulus": 1,
+        "times": 0.07
     },
     {
         "etype": "hm",
         "ctype": "混煤",
         "fun": hmfun,
         "basefun": baselinearfunc,
-        "modulus": 4
+        "modulus": 3.8,
+        "times": 0.38
     },
     {
         "etype": "pk",
         "ctype": "PB粉",
         "fun": pkfun,
         "basefun": baselinearfunc,
-        "modulus": 6
+        "modulus": 6,
+        "times": 0.46
     },
     {
         "etype": "ak",
         "ctype": "阿特粉",
         "fun": akfun,
         "basefun": baselinearfunc,
-        "modulus": 3
+        "modulus": 3,
+        "times": 0.23
     },
     {
         "etype": "j",
         "ctype": "焦炭",
         "fun": jfun,
         "basefun": baselinearfunc,
-        "modulus": 1
+        "modulus": 1.2,
+        "times": 0.03
     },
 ];
 
 
-var quantity2=function(){
-    return [
-        {"hour":"18","type":"xm","count":"40"},
-        {"hour":"18","type":"wm","count":"25"},
-        {"hour":"18","type":"hm","count":"25"},
-        {"hour":"18","type":"pk","count":"40"},
-        {"hour":"18","type":"ak","count":"20"},
-        {"hour":"18","type":"j","count":"15"},
-        {"hour":"19","type":"xm","count":"6"},
-        {"hour":"19","type":"xm","count":"10"},
-        {"hour":"19","type":"hm","count":"12"},
-        {"hour":"21","type":"pk","count":"35"},
-        {"hour":"21","type":"hm","count":"44"},
-        {"hour":"22","type":"ak","count":"35"},
-        {"hour":"0","type":"pk","count":"33"},
-        {"hour":"1","type":"xm","count":"44"},
-        {"hour":"2","type":"hm","count":"9"},
-        {"hour":"2","type":"pk","count":"35"},
-        {"hour":"4","type":"xm","count":"1"},
-        {"hour":"4","type":"ak","count":"9"},
-        {"hour":"4","type":"j","count":"54"},
-        {"hour":"5","type":"ak","count":"26"},
-        {"hour":"12","type":"pk","count":"34"},
-        {"hour":"12","type":"wm","count":"33"},
-        ]
+var quantity2 = function () {
+    return [{
+            "hour": "18",
+            "type": "xm",
+            "count": "40"
+        },
+        {
+            "hour": "18",
+            "type": "wm",
+            "count": "25"
+        },
+        {
+            "hour": "18",
+            "type": "hm",
+            "count": "32"
+        },
+        {
+            "hour": "18",
+            "type": "pk",
+            "count": "40"
+        },
+        {
+            "hour": "18",
+            "type": "ak",
+            "count": "20"
+        },
+        {
+            "hour": "18",
+            "type": "j",
+            "count": "20"
+        },
+        {
+            "hour": "19",
+            "type": "xm",
+            "count": "6"
+        },
+        {
+            "hour": "19",
+            "type": "xm",
+            "count": "10"
+        },
+        {
+            "hour": "19",
+            "type": "hm",
+            "count": "12"
+        },
+        {
+            "hour": "21",
+            "type": "pk",
+            "count": "35"
+        },
+        {
+            "hour": "21",
+            "type": "hm",
+            "count": "44"
+        },
+        {
+            "hour": "22",
+            "type": "ak",
+            "count": "35"
+        },
+        {
+            "hour": "0",
+            "type": "pk",
+            "count": "33"
+        },
+        {
+            "hour": "1",
+            "type": "xm",
+            "count": "44"
+        },
+        {
+            "hour": "2",
+            "type": "hm",
+            "count": "9"
+        },
+        {
+            "hour": "2",
+            "type": "pk",
+            "count": "35"
+        },
+        {
+            "hour": "4",
+            "type": "xm",
+            "count": "1"
+        },
+        {
+            "hour": "4",
+            "type": "ak",
+            "count": "9"
+        },
+        {
+            "hour": "6",
+            "type": "j",
+            "count": "54"
+        },
+        {
+            "hour": "5",
+            "type": "ak",
+            "count": "26"
+        },
+        {
+            "hour": "12",
+            "type": "pk",
+            "count": "34"
+        },
+        {
+            "hour": "12",
+            "type": "wm",
+            "count": "33"
+        },
+    ]
 }
 
 
@@ -149,7 +267,7 @@ var quantity = function () {
         {
             "hour": "18",
             "type": "hm",
-            "count": "25"
+            "count": "32"
         },
         {
             "hour": "18",
@@ -164,7 +282,7 @@ var quantity = function () {
         {
             "hour": "18",
             "type": "j",
-            "count": "15"
+            "count": "20"
         },
         {
             "hour": "19",
@@ -242,7 +360,7 @@ var quantity = function () {
             "count": "35"
         },
         {
-            "hour": "14",
+            "hour": "12",
             "type": "j",
             "count": "54"
         },
@@ -252,123 +370,123 @@ var quantity = function () {
 
 var links = function () {
     return [{
-        "source": "道清",
-        "target": "洗煤",
-        "value": "12"
-    },
-    {
-        "source": "前阳南",
-        "target": "铁矿粉",
-        "value": "235"
-    },
-    {
-        "source": "前阳南",
-        "target": " ",
-        "value": "39"
-    },
-    {
-        "source": " ",
-        "target": "   ",
-        "value": "39"
-    },
-    {
-        "source": "   ",
-        "target": "无烟煤",
-        "value": "39"
-    },
-    {
-        "source": "梅河口",
-        "target": "铁矿粉",
-        "value": "35"
-    },
-    {
-        "source": "苏家屯",
-        "target": "梅河口",
-        "value": "60"
-    },
-    {
-        "source": "棋盘",
-        "target": "梅河口",
-        "value": "26"
-    },
-    {
-        "source": "裕国",
-        "target": "梅河口",
-        "value": "55"
-    },
-    {
-        "source": "张台子",
-        "target": "苏家屯",
-        "value": "10"
-    },
-    {
-        "source": "山海关",
-        "target": "裕国",
-        "value": "54"
-    },
-    {
-        "source": "哈局",
-        "target": "棋盘",
-        "value": "20"
-    },
-    {
-        "source": "大官屯",
-        "target": "苏家屯",
-        "value": "10"
-    },
-    {
-        "source": "梅河口",
-        "target": "焦炭",
-        "value": "55"
-    },
-    {
-        "source": "梅河口",
-        "target": "焦炭",
-        "value": "54"
-    },
-    {
-        "source": "铁矿粉",
-        "target": "东通化",
-        "value": "270"
-    },
-    {
-        "source": "无烟煤",
-        "target": "东通化",
-        "value": "39"
-    },
-    {
-        "source": "焦炭",
-        "target": "东通化",
-        "value": "55"
-    },
-    {
-        "source": "梅河口",
-        "target": "洗煤",
-        "value": "51"
-    },
-    {
-        "source": "洗煤",
-        "target": "东通化",
-        "value": "63"
-    }, {
-        "source": "球团铁矿",
-        "target": "东通化",
-        "value": "20"
-    },
-    {
-        "source": "白山市",
-        "target": "  ",
-        "value": "20"
-    }, {
-        "source": "  ",
-        "target": "    ",
-        "value": "20"
-    },{
-        "source": "    ",
-        "target": "球团铁矿",
-        "value": "20"
-    },
-]
+            "source": "道清",
+            "target": "洗煤",
+            "value": "12"
+        },
+        {
+            "source": "前阳南",
+            "target": "铁矿粉",
+            "value": "235"
+        },
+        {
+            "source": "前阳南",
+            "target": " ",
+            "value": "39"
+        },
+        {
+            "source": " ",
+            "target": "   ",
+            "value": "39"
+        },
+        {
+            "source": "   ",
+            "target": "无烟煤",
+            "value": "39"
+        },
+        {
+            "source": "梅河口",
+            "target": "铁矿粉",
+            "value": "35"
+        },
+        {
+            "source": "苏家屯",
+            "target": "梅河口",
+            "value": "60"
+        },
+        {
+            "source": "棋盘",
+            "target": "梅河口",
+            "value": "26"
+        },
+        {
+            "source": "裕国",
+            "target": "梅河口",
+            "value": "55"
+        },
+        {
+            "source": "张台子",
+            "target": "苏家屯",
+            "value": "10"
+        },
+        {
+            "source": "山海关",
+            "target": "裕国",
+            "value": "54"
+        },
+        {
+            "source": "哈局",
+            "target": "棋盘",
+            "value": "20"
+        },
+        {
+            "source": "大官屯",
+            "target": "苏家屯",
+            "value": "10"
+        },
+        {
+            "source": "梅河口",
+            "target": "焦炭",
+            "value": "55"
+        },
+        {
+            "source": "梅河口",
+            "target": "焦炭",
+            "value": "54"
+        },
+        {
+            "source": "铁矿粉",
+            "target": "东通化",
+            "value": "270"
+        },
+        {
+            "source": "无烟煤",
+            "target": "东通化",
+            "value": "39"
+        },
+        {
+            "source": "焦炭",
+            "target": "东通化",
+            "value": "55"
+        },
+        {
+            "source": "梅河口",
+            "target": "洗煤",
+            "value": "51"
+        },
+        {
+            "source": "洗煤",
+            "target": "东通化",
+            "value": "63"
+        }, {
+            "source": "球团铁矿",
+            "target": "东通化",
+            "value": "20"
+        },
+        {
+            "source": "白山市",
+            "target": "  ",
+            "value": "20"
+        }, {
+            "source": "  ",
+            "target": "    ",
+            "value": "20"
+        }, {
+            "source": "    ",
+            "target": "球团铁矿",
+            "value": "20"
+        },
+    ]
 
     /* return [{
             "source": "道清",
@@ -501,7 +619,7 @@ var wordclouddata = [{
         "value": "300"
     },
     {
-        "name": "抠老牌车",
+        "name": "压缩老牌车",
         "value": "300"
     },
     {
@@ -543,11 +661,11 @@ var wordclouddata = [{
     {
         "name": "压车",
         "value": "300"
-    },    {
+    }, {
         "name": "草市",
         "value": "100"
     },
-     {
+    {
         "name": "本溪",
         "value": "100"
     },

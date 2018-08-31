@@ -125,7 +125,7 @@
 				.attr("fill", "#000");
 
 			//按品名画线
-			/*mapbg.selectAll("*:not(*)").data(TempData).enter().append("path").attr({
+			mapbg.selectAll("*:not(*)").data(TempData).enter().append("path").attr({
 					"fill": "none",
 					"stroke": (d, i) => tcolor[d.type],
 					"class": (d, i) => "trainline" + d.arvsta,
@@ -167,10 +167,10 @@
 				//.attr("marker-end", "url(#arrow)") 
 				.style({
 					"stroke-width":(d,i)=>parseInt(d.count)*0.02
-				});*/
+				});
 
 			//按流量画线
-			mapbg.selectAll("*:not(*)").data(groupdata).enter().append("path").attr({
+			/*mapbg.selectAll("*:not(*)").data(groupdata).enter().append("path").attr({
 					"fill": "none",
 					"stroke": (d, i) => tcolor[d.type],
 					"d": (d, i) => {
@@ -211,7 +211,7 @@
 				//.attr("marker-end", "url(#arrow)") 
 				.style({
 					"stroke-width": d => d.sum * (0.5 / mingroupdata)
-				});
+				});*/
 
 
 			//将车站位置信息转为数组
@@ -438,7 +438,7 @@
 		<Row>
 			<i-col span="8" offset="8">
 				<div>
-					<h1>通钢进车模型OD图</h1>
+					<h1>X钢厂进车模型OD图</h1>
 				</div>
 			</i-col>
 			<i-Col span="4" offset="4"></i-Col>
