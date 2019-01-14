@@ -233,7 +233,7 @@ function drawRadial(data, svg, svgSize, margin) {
 }
 
 
-
+//面积图
 function drawArea(t, svg, svgSize, margin, khtype, modalshow, khdj, teamid) {
     let cell = 50;
     let maxY = d3.max(t, (x) => parseInt(x.Count));
