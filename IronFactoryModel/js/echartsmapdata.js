@@ -71,7 +71,7 @@ var typeinfo = [{
         "fun": xmfun,
         "basefun": baselinearfunc,
         "modulus": 4,
-        "times": 0.38,
+        "times": "24.5%",
         lable: {
             normal: {
                 formatter: (t) => {
@@ -98,7 +98,7 @@ var typeinfo = [{
         "fun": wmfun,
         "basefun": baselinearfunc,
         "modulus": 1,
-        "times": 0.07
+        "times": "4.5%"
     },
     {
         "etype": "hm",
@@ -106,7 +106,7 @@ var typeinfo = [{
         "fun": hmfun,
         "basefun": baselinearfunc,
         "modulus": 3.8,
-        "times": 0.38
+        "times": "24.5%"
     },
     {
         "etype": "pk",
@@ -114,7 +114,7 @@ var typeinfo = [{
         "fun": pkfun,
         "basefun": baselinearfunc,
         "modulus": 6,
-        "times": 0.46
+        "times": "29.7%"
     },
     {
         "etype": "ak",
@@ -122,7 +122,7 @@ var typeinfo = [{
         "fun": akfun,
         "basefun": baselinearfunc,
         "modulus": 3,
-        "times": 0.23
+        "times": "14.8%"
     },
     {
         "etype": "j",
@@ -130,7 +130,7 @@ var typeinfo = [{
         "fun": jfun,
         "basefun": baselinearfunc,
         "modulus": 1.2,
-        "times": 0.03
+        "times": "1.9%"
     },
 ];
 

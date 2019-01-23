@@ -294,11 +294,16 @@
                     textBaseline: 'middle',
                     top: (idx + 0.3) * 100 / 6 + '%',
                     text:t.ctype,
-                    subtext:"原料占比: "+t.times,
+                    textStyle:{
+                        color:"#000",
+                        fontWeight:"500",
+                        fontSize:25
+                    },
+                    subtext:"占比: "+t.times,
                     subtextStyle:{
                         color:"#000",
                         fontWeight:"500",
-                        fontSize:15
+                        fontSize:18
                     }
 
                 });
