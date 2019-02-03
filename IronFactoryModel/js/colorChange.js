@@ -262,7 +262,7 @@ Date.prototype.Format = function (fmt) { //author: meizz
 	return fmt;
 }
 
-
+//《经济学人》风格配色
 var EconomistStyleColor = ["rgb(93,145,167)", "rgb(0,81,108)", "rgb(0,164,220)", "rgb(107,207,246)", "rgb(0,137,130)", "rgb(109,187,191)", "rgb(122,37,15)", "rgb(234,143,116)", "rgb(168,169,173)", "rgb(236,237,234)"];
 var EconomistStyleBGColor = ["rgb(205,221,230)", "rgb(184,207,220)"];
 

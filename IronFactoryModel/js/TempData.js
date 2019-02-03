@@ -83,18 +83,18 @@
 			"arvsta": "dth",
 			"trainnum": "37713"
 		},
-		{
-			"group": "4",
-			"xh": "3",
-			"levtime": "14:00",
-			"arrtime": "19:20",
-			"adddays": "0",
-			"type": "hm",
-			"count": "35",
-			"levsta": "mhk",
-			"arvsta": "dth",
-			"trainnum": "37706"
-		},
+		// {
+		// 	"group": "4",
+		// 	"xh": "3",
+		// 	"levtime": "14:00",
+		// 	"arrtime": "19:20",
+		// 	"adddays": "0",
+		// 	"type": "hm",
+		// 	"count": "35",
+		// 	"levsta": "mhk",
+		// 	"arvsta": "dth",
+		// 	"trainnum": "37706"
+		// },
 		{
 			"group": "5",
 			"xh": "1",
@@ -119,18 +119,18 @@
 			"arvsta": "mhk",
 			"trainnum": "37715"
 		},
-		{
-			"group": "6",
-			"xh": "3",
-			"levtime": "8:05",
-			"arrtime": "14:20",
-			"adddays": "0",
-			"type": "hm",
-			"count": "35",
-			"levsta": "sysn",
-			"arvsta": "mhk",
-			"trainnum": "37702"
-		},
+		// {
+		// 	"group": "6",
+		// 	"xh": "3",
+		// 	"levtime": "8:05",
+		// 	"arrtime": "14:20",
+		// 	"adddays": "0",
+		// 	"type": "hm",
+		// 	"count": "35",
+		// 	"levsta": "sysn",
+		// 	"arvsta": "mhk",
+		// 	"trainnum": "37702"
+		// },
 		{
 			"group": "6",
 			"xh": "2",
@@ -143,18 +143,18 @@
 			"arvsta": "mhk",
 			"trainnum": "37702"
 		},
-		{
-			"group": "7",
-			"xh": "1",
-			"levtime": "23:00",
-			"arrtime": "11:20",
-			"adddays": "1",
-			"type": "hm",
-			"count": "35",
-			"levsta": "thdq",
-			"arvsta": "sysn",
-			"trainnum": "37702"
-		},
+		// {
+		// 	"group": "7",
+		// 	"xh": "1",
+		// 	"levtime": "23:00",
+		// 	"arrtime": "11:20",
+		// 	"adddays": "1",
+		// 	"type": "hm",
+		// 	"count": "35",
+		// 	"levsta": "thdq",
+		// 	"arvsta": "sysn",
+		// 	"trainnum": "37702"
+		// },
 		{
 			"group": "8",
 			"xh": "1",

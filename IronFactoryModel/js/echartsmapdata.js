@@ -71,7 +71,7 @@ var typeinfo = [{
         "fun": xmfun,
         "basefun": baselinearfunc,
         "modulus": 4,
-        "times": "24.5%",
+        "times": "32.5%",
         lable: {
             normal: {
                 formatter: (t) => {
@@ -98,23 +98,23 @@ var typeinfo = [{
         "fun": wmfun,
         "basefun": baselinearfunc,
         "modulus": 1,
-        "times": "4.5%"
+        "times": "6.0%"
     },
-    {
-        "etype": "hm",
-        "ctype": "混煤",
-        "fun": hmfun,
-        "basefun": baselinearfunc,
-        "modulus": 3.8,
-        "times": "24.5%"
-    },
+    // {
+    //     "etype": "hm",
+    //     "ctype": "混煤",
+    //     "fun": hmfun,
+    //     "basefun": baselinearfunc,
+    //     "modulus": 3.8,
+    //     "times": "24.5%"
+    // },
     {
         "etype": "pk",
         "ctype": "PB粉",
         "fun": pkfun,
         "basefun": baselinearfunc,
         "modulus": 6,
-        "times": "29.7%"
+        "times": "39.4%"
     },
     {
         "etype": "ak",
@@ -122,7 +122,7 @@ var typeinfo = [{
         "fun": akfun,
         "basefun": baselinearfunc,
         "modulus": 3,
-        "times": "14.8%"
+        "times": "19.6%"
     },
     {
         "etype": "j",
@@ -130,7 +130,7 @@ var typeinfo = [{
         "fun": jfun,
         "basefun": baselinearfunc,
         "modulus": 1.2,
-        "times": "1.9%"
+        "times": "2.5%"
     },
 ];
 
@@ -146,11 +146,11 @@ var quantity2 = function () {
             "type": "wm",
             "count": "25"
         },
-        {
-            "hour": "18",
-            "type": "hm",
-            "count": "32"
-        },
+        // {
+        //     "hour": "18",
+        //     "type": "hm",
+        //     "count": "32"
+        // },
         {
             "hour": "18",
             "type": "pk",
@@ -176,21 +176,21 @@ var quantity2 = function () {
             "type": "xm",
             "count": "10"
         },
-        {
-            "hour": "19",
-            "type": "hm",
-            "count": "12"
-        },
+        // {
+        //     "hour": "19",
+        //     "type": "hm",
+        //     "count": "12"
+        // },
         {
             "hour": "21",
             "type": "pk",
             "count": "35"
         },
-        {
-            "hour": "21",
-            "type": "hm",
-            "count": "44"
-        },
+        // {
+        //     "hour": "21",
+        //     "type": "hm",
+        //     "count": "44"
+        // },
         {
             "hour": "22",
             "type": "ak",
@@ -206,11 +206,11 @@ var quantity2 = function () {
             "type": "xm",
             "count": "44"
         },
-        {
-            "hour": "2",
-            "type": "hm",
-            "count": "9"
-        },
+        // {
+        //     "hour": "2",
+        //     "type": "hm",
+        //     "count": "9"
+        // },
         {
             "hour": "2",
             "type": "pk",
@@ -264,11 +264,11 @@ var quantity = function () {
             "type": "wm",
             "count": "25"
         },
-        {
-            "hour": "18",
-            "type": "hm",
-            "count": "32"
-        },
+        // {
+        //     "hour": "18",
+        //     "type": "hm",
+        //     "count": "32"
+        // },
         {
             "hour": "18",
             "type": "pk",
@@ -294,11 +294,11 @@ var quantity = function () {
             "type": "pk",
             "count": "35"
         },
-        {
-            "hour": "21",
-            "type": "hm",
-            "count": "44"
-        },
+        // {
+        //     "hour": "21",
+        //     "type": "hm",
+        //     "count": "44"
+        // },
         {
             "hour": "22",
             "type": "pk",
@@ -314,21 +314,21 @@ var quantity = function () {
             "type": "xm",
             "count": "10"
         },
-        {
-            "hour": "23",
-            "type": "hm",
-            "count": "12"
-        },
+        // {
+        //     "hour": "23",
+        //     "type": "hm",
+        //     "count": "12"
+        // },
         {
             "hour": "0",
             "type": "pk",
             "count": "33"
         },
-        {
-            "hour": "2",
-            "type": "hm",
-            "count": "9"
-        },
+        // {
+        //     "hour": "2",
+        //     "type": "hm",
+        //     "count": "9"
+        // },
         {
             "hour": "2",
             "type": "pk",

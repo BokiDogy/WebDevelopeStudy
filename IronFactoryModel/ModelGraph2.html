@@ -57,8 +57,8 @@
             left: 80,
             right: 50
         };
-        var types = ['j', 'xm', 'hm', 'pk', 'ak'];
-        var ctypes = ['焦炭', '洗煤', '褐煤', 'PB粉', '阿特粉'];
+        var types = ['j', 'xm',  'pk', 'ak'];//'hm',
+        var ctypes = ['焦炭', '洗煤',  'PB粉', '阿特粉'];//'褐煤',
         var chinesenames = ['沈阳枢纽', '东通化', '梅河口', '丹东港', '哈局', '山海关', '通霍地区', '通化周边'];
         var stationnames = chinesenames.map(x => {
             return {
@@ -233,10 +233,11 @@
                 '11', '12', '13', '14', '15', '16', '17', '18'
             ];
             var typefunctions = {};
+            console.log(qdata);
             typeinfo.forEach(x => typefunctions[x.etype] = [x.fun, x.basefun, x.modulus]);
-
-
+            
             var groupqdata = _(qdata).groupBy(x => x.type);
+            
             let scdata = Object.keys(groupqdata).map(k => {
                 let l = groupqdata[k];
                 let hourqu = l.map(x => [x.hour, parseInt(x.count)]);
@@ -254,7 +255,7 @@
                         }
                     })
                 });
-
+                console.log(typefunctions[k]);
                 let afterfunresult1 = typefunctions[k][0](bakresult.map((x, i) => x[1]), typefunctions[k][1],
                     typefunctions[k][2]);
                 let afterfunresult = bakresult.map((x, i) => [x[0], afterfunresult1[i]]).slice(0,24);
